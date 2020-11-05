@@ -1,6 +1,6 @@
-#include <iostream>
+#include "client.hpp"
 
-int main(int argc, char const *argv[]){
-    std::cout << "client runs!" << std::endl;
-    return 0;
-}
+void Client::createSocket(){
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+};
+
