@@ -10,14 +10,31 @@
 #include <netdb.h>
 #include <iostream>
 
-class Client
-{
-    public:
-        Client(const char* serverAddr, int port, void* data);
+namespace network{
+    class Client
+    {
+        public:
 
-        void createSocket();
-        void shutDown();
+            //Constructor
+            Client(std::string inputServerIpAddr ,int inputPort);
+            
+            //Creates socket and setups any configurations related to the socket
+            void createSocket();
 
-    private:
-        int sock;
+            //establishes and connects to the server
+            void connectToServer();
+
+            //closes connection
+            void shutDown();
+            
+
+        private:
+            int port;
+            int sock;
+            std::string serverIpAddr;
+            sockaddr_in hint;
+
+            void setup();
+
+    };
 }
