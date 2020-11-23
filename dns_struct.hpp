@@ -4,7 +4,7 @@
 //Refer to RFC 1034, 1035 for all the structures
 
 //Refer to section 4.1.1 RFC 1035
-struct{
+struct HEADER{
 
     //unique id for the specific dns header
     unsigned short id;
@@ -46,10 +46,10 @@ struct{
     //# of rr in additional records section
     unsigned short arcount;
 
-}HEADER;
+};
 
 //Refer to section 4.1.2 RFC 1035
-struct{
+struct QUESTION{
     //NOTE: not sure if qname is in correct format
     //query name
     unsigned char *qname;
@@ -60,10 +60,10 @@ struct{
     //query class
     unsigned short qclass;
 
-}QUESTION;
+};
 
 //Refer to section 4.1.3 RFC 1035
-struct{
+struct RESOURCE_RECORD{
     
     //domain name of the resource record
     unsigned char *rrName;
@@ -83,4 +83,4 @@ struct{
     //NOTE: not sure if this is correct either
     unsigned char *rdata;
 
-}RESOURCE_RECORD;
+};
