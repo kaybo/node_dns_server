@@ -9,30 +9,47 @@ struct HEADER{
     //unique id for the specific dns header
     unsigned short id;
 
-    //indicates type of message, 0: query, 1: response
-    unsigned char qr :1;
+    //WARNING: super important to rearrange the bits field in opposite order so
+    //the network knows how to identify it. htons does not work for this specific
+    //scenario so each field must be manually adjusted. One of the reason to
+    //why packet malform keeps occuring
+
+    //Re-arranged these 8 bits first
+
+    //recursion desired
+    unsigned char rd: 1;
+
+    //truncation
+    unsigned char tc: 1;
+
+    //Authoritative answer
+    unsigned char aa: 1;
 
     //specifies kind of query in message. I believe it should be set
     //to 0 as default
     unsigned char opcode: 4;
 
-    //Authoritative answer
-    unsigned char aa: 1;
+    //indicates type of message, 0: query, 1: response
+    unsigned char qr :1;
 
-    //truncation
-    unsigned char tc: 1;
+    //Re-arranged these 8 bits second
 
-    //recursion desired
-    unsigned char rd: 1;
+    //response code(values from 0 to 5, 6-15 is reserved)
+    unsigned char rcode: 4;
+
+    //checking disabled(new stuff that's not in RFC1035)
+    unsigned char cd: 1;
+
+    //authenticated data(new stuff that's not in RFC1035)
+    unsigned char ad: 1;
+
+    //best not to touch this
+    unsigned char z: 1;
 
     //recursion available
     unsigned char ra: 1;
 
-    //best not to touch this
-    unsigned char z: 3;
-
-    //response code(values from 0 to 5, 6-15 is reserved)
-    unsigned char rcode: 4;
+    //WARNING: MUST USE HTON ON THESE FOUR FIELDS
 
     //# of entries in question section
     unsigned short qdcount;
@@ -52,7 +69,7 @@ struct HEADER{
 struct QUESTION{
     //NOTE: not sure if qname is in correct format
     //query name
-    unsigned char *qname;
+    // unsigned char *qname;
 
     //query type
     unsigned short qtype;
