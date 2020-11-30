@@ -30,6 +30,7 @@ unsigned char *convertHostNameToDNSField(std::string inputString){
     return conversionField;
 };
 
+//TODO: do htons instead of letting user doing it
 unsigned char *encodeDNSQuery(std::string domainName, HEADER dnsHeader, QUESTION dnsQuestion){
 
     unsigned char *convertedDomainName = convertHostNameToDNSField(domainName);
@@ -62,4 +63,49 @@ unsigned char *encodeDNSQuery(std::string domainName, HEADER dnsHeader, QUESTION
     delete convertedDomainName;
 
     return encodedInfo;
+};
+
+void decodeDNSRespond(unsigned char *buf){
+    std::cout << "Decoding function running" << std::endl;
+    int pointerOffSet = 0;
+
+    HEADER *decodedHeader = new HEADER();
+    memcpy(decodedHeader, buf, sizeof(*decodedHeader));
+    pointerOffSet += sizeof(*decodedHeader);
+
+    //converting edians to host format
+    decodedHeader->id = ntohs(decodedHeader->id);
+    decodedHeader->qdcount = ntohs(decodedHeader->qdcount);
+    decodedHeader->ancount = ntohs(decodedHeader->ancount);
+    decodedHeader->nscount = ntohs(decodedHeader->nscount);
+    decodedHeader->arcount = ntohs(decodedHeader->arcount);
+
+    //decoding questions section
+
+    //TODO: IMPLEMENT THIS
+    while(buf[pointerOffSet] != '\0'){
+        std::cout << buf[pointerOffSet] << std::endl;
+        pointerOffSet++;
+    }
+    pointerOffSet++;
+
+    QUESTION *decodedQuestion = new QUESTION();
+    memcpy(decodedQuestion, buf + pointerOffSet, sizeof(*decodedQuestion));
+
+    decodedQuestion->qtype = ntohs(decodedQuestion->qtype);
+    decodedQuestion->qclass = ntohs(decodedQuestion->qclass);
+    pointerOffSet += sizeof(*decodedQuestion);
+
+    //TODO: DEBUG THIS
+    std::cout<<"asnwer count: " << decodedHeader->ancount << "pointer offset: " << pointerOffSet  << std::endl;
+
+    for(int index = 0; index < decodedHeader->ancount; index++){
+        //resource record name
+        //TODO: IMPLEMENT THIS
+        // while(buf[pointerOffSet] != '\0'){
+        //     std::cout << buf[pointerOffSet] << std::endl;
+        //     pointerOffSet++;
+        // }
+    }
+
 };

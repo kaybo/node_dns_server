@@ -21,3 +21,6 @@ unsigned char *convertHostNameToDNSField(std::string inputString);
 
 //Encodes the dnsquery and returns an encoded array ready to be sent over udp to other servers
 unsigned char *encodeDNSQuery(std::string domainName, HEADER dnsHeader, QUESTION dnsQuestion);
+
+//decodes the data from the buffer
+void decodeDNSRespond(unsigned char *buf);

@@ -53,15 +53,14 @@ void network::Server::performAction(){
 
     //This is a simple test query to the root server
     HEADER testHead = HEADER();
-    // testHead.arcount = htons(1337);
-    testHead.id = htons(0x0);
+    testHead.id = htons(1337);
     testHead.qr = 0x0;
     std::cout <<"testing testhead.qr: " <<  std::bitset<8>(testHead.qr)<< std::endl;
     // testHead.opcode = htons(0x0);
     testHead.tc = 0x0;
     //left out aa for now: teadHead.aa
-    testHead.rd = 0x1;
-    testHead.ra = 0x1;
+    testHead.rd = 0x0;
+    testHead.ra = 0x0;
     testHead.ad = 0x0;
 
     testHead.qdcount = htons(1);
@@ -74,9 +73,9 @@ void network::Server::performAction(){
     testQuestion.qtype = htons(1);
     testQuestion.qclass = htons(1);
 
-    unsigned char *testConversion = convertHostNameToDNSField("www.northeastern.edu");
-
-    unsigned char *encodedInfo = encodeDNSQuery("www.google.com",testHead,testQuestion);
+    unsigned char *testConversion = convertHostNameToDNSField("google.com");
+    std::string domainName = "google.com";
+    unsigned char *encodedInfo = encodeDNSQuery(domainName,testHead,testQuestion);
     int totalSize = sizeof(testHead) 
     + strlen((const char*)testConversion) + 1 + sizeof(testQuestion.qclass) + sizeof(testQuestion.qtype);
 
@@ -104,18 +103,19 @@ void network::Server::performAction(){
             std::cout <<"error with sendto()" << std::endl;
         }
 
-        char buffer[512]; 
+        unsigned char buffer[512]; 
         memset (&buffer, 0, 512);
         //todo: look up bind9 and wireshark
         std::cout << "send test data to dns server: " << result << std::endl; 
     
         
         socklen_t len = 0;
-        int n = recvfrom(dnsListener, (char *)buffer, 512,  
+        int n = recvfrom(dnsListener, buffer, 512,  
                 0, (struct sockaddr *) &dnsHint, 
                 &len); 
-        std::cout << "buff data: %s"  << buffer << std::endl;
         std::cout << "retrieve successful? " << std::endl; 
+
+        decodeDNSRespond(buffer);
     }
 
 
