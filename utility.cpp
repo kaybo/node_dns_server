@@ -1,11 +1,9 @@
 #include "utility.hpp"
-#include <bitset>
+
 
 
 unsigned char *convertHostNameToDNSField(std::string inputString){
-    // std::string testString = "www.charity.org";
-    // std::string testString = "www.google.io";
-    // std::cout << "testing kinda works???: " <<testString.length()<< std::endl;
+
     int newSize = inputString.length() + 2;
     unsigned char *conversionField = new unsigned char[newSize];
 
@@ -29,26 +27,39 @@ unsigned char *convertHostNameToDNSField(std::string inputString){
     conversionField[dotIndex] = charCount;
     conversionField[newIndex] = '\0';
 
-
-    //conversion from little edian to big edian
-    // unsigned char *returnField = new unsigned char[newSize];
-    // int returnIndex = newSize - 1;
-    // int iteratingIndex = 0;
-    // while(conversionField[iteratingIndex] != '\0'){   
-    //     returnField[returnIndex] = conversionField[iteratingIndex];
-    //     returnIndex--;
-    //     iteratingIndex++;
-    // }
-
-
-    //debugging code
-    // int testIndex = 0;
-    // while(conversionField[testIndex] != '\0'){
-    //     std::cout << "help: " << conversionField[testIndex] <<" " << std::bitset<8>(conversionField[testIndex]) << std::endl;
-    //     testIndex++;
-    // }
-    //end
-
     return conversionField;
-    // return returnField;
+};
+
+unsigned char *encodeDNSQuery(std::string domainName, HEADER dnsHeader, QUESTION dnsQuestion){
+
+    unsigned char *convertedDomainName = convertHostNameToDNSField(domainName);
+
+    int totalSize = sizeof(dnsHeader) 
+    + strlen((const char*)convertedDomainName) + 1 + sizeof(dnsQuestion.qclass) + sizeof(dnsQuestion.qtype);
+
+    //encoded array
+    unsigned char *encodedInfo = new unsigned char[totalSize];
+    memset(encodedInfo, 0 ,totalSize);
+
+    int pointerOffSet = 0;
+
+    //encoding header struct
+    memcpy(encodedInfo, &dnsHeader, sizeof(dnsHeader));
+    pointerOffSet += sizeof(dnsHeader);
+
+    //encoding domain name
+    int index = 0;
+    while(convertedDomainName[index] != '\0'){
+        encodedInfo[pointerOffSet] = convertedDomainName[index];
+        index++;
+        pointerOffSet++;
+    }
+    pointerOffSet++;//for the \0 character
+
+    //encoding question struct
+    memcpy(encodedInfo+pointerOffSet, &dnsQuestion, sizeof(dnsQuestion));
+    
+    delete convertedDomainName;
+
+    return encodedInfo;
 };
