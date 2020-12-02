@@ -61,9 +61,9 @@ void network::Server::performAction(){
     // testHead.opcode = htons(0x0);
     testHead.tc = 0x0;
     //left out aa for now: teadHead.aa
-    testHead.rd = 0x0;
-    testHead.ra = 0x0;
-    testHead.ad = 0x0;
+
+    //TODO: NEED TO FIX HEADER AGAIN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    testHead.rd = 0x1;
 
     testHead.qdcount = htons(1);
     testHead.ancount = htons(0);
@@ -75,8 +75,8 @@ void network::Server::performAction(){
     testQuestion.qtype = htons(1);
     testQuestion.qclass = htons(1);
 
-    unsigned char *testConversion = convertHostNameToDNSField("www.google.com");
-    std::string domainName = "www.google.com";
+    unsigned char *testConversion = convertHostNameToDNSField("sfu.ca");
+    std::string domainName = "sfu.ca";
     unsigned char *encodedInfo = encodeDNSQuery(domainName,testHead,testQuestion);
     int totalSize = sizeof(testHead) 
     + strlen((const char*)testConversion) + 1 + sizeof(testQuestion.qclass) + sizeof(testQuestion.qtype);
