@@ -66,10 +66,23 @@ struct HEADER{
 };
 
 //Refer to section 4.1.2 RFC 1035
+//Note: Use RES_QUESTION if it is a dns response query.
+//      Request query use this only!!!
 struct QUESTION{
-    //NOTE: not sure if qname is in correct format
+    //query type
+    unsigned short qtype;
+
+    //query class
+    unsigned short qclass;
+
+};
+
+//Refer to section 4.1.2 RFC 1035
+//used only for decoding, formatting and putting it on local server
+//WARNING: Use QUESTION struct for dns request queries
+struct RES_QUESTION{
     //query name
-    // unsigned char *qname;
+    unsigned char *qname;
 
     //query type
     unsigned short qtype;
@@ -78,6 +91,8 @@ struct QUESTION{
     unsigned short qclass;
 
 };
+
+
 
 //Refer to section 4.1.3 RFC 1035
 struct RESOURCE_RECORD{

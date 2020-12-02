@@ -1,3 +1,5 @@
+//Author: Feng Wu
+
 #include "utility.hpp"
 
 
@@ -28,6 +30,11 @@ unsigned char *convertHostNameToDNSField(std::string inputString){
     conversionField[newIndex] = '\0';
 
     return conversionField;
+};
+
+//TODO: Implement this!
+std::string convertDNSFieldToHostName(unsigned char field){
+    return "test";
 };
 
 //TODO: do htons instead of letting user doing it
@@ -82,12 +89,21 @@ void decodeDNSRespond(unsigned char *buf){
 
     //decoding questions section
 
-    //TODO: IMPLEMENT THIS
-    while(buf[pointerOffSet] != '\0'){
+    //getting qname
+    int fieldLength = 0;
+    int tempPointerOffSet = pointerOffSet; //used for temp tracing
+    while(buf[tempPointerOffSet] != '\0'){
+        fieldLength++;
+        tempPointerOffSet++;
+    }
+    fieldLength++;
+
+    unsigned char *qname = new unsigned char[fieldLength];
+    for(int index = 0; index < fieldLength ; index++){
         std::cout << buf[pointerOffSet] << std::endl;
+        qname[index] = buf[pointerOffSet];
         pointerOffSet++;
     }
-    pointerOffSet++;
 
     QUESTION *decodedQuestion = new QUESTION();
     memcpy(decodedQuestion, buf + pointerOffSet, sizeof(*decodedQuestion));
@@ -96,16 +112,82 @@ void decodeDNSRespond(unsigned char *buf){
     decodedQuestion->qclass = ntohs(decodedQuestion->qclass);
     pointerOffSet += sizeof(*decodedQuestion);
 
-    //TODO: DEBUG THIS
-    std::cout<<"asnwer count: " << decodedHeader->ancount << "pointer offset: " << pointerOffSet  << std::endl;
+    //RES_QUESTION used for putting it back into local server
+    RES_QUESTION *resDecodedQuestion = new RES_QUESTION();
+    resDecodedQuestion->qname = qname;
+    resDecodedQuestion->qclass = decodedQuestion->qclass;
+    resDecodedQuestion->qtype = decodedQuestion->qtype;
+    delete decodedQuestion;
+
 
     for(int index = 0; index < decodedHeader->ancount; index++){
         //resource record name
         //TODO: IMPLEMENT THIS
+
+        //NOTE: THIS ONLY WORKS IF MESSAGE COMPRESSION OCCURS, I'M NOT SURE IF THIS WORKS ON OTHER FORMATS
+        //NEED TO CHECK IF NAME != QANME IN OTHER ANSWERS
+        //1)Get two octet (2bytes) from the buffer
+        //2)only 14bits(ignore the firs two bits) and store it in var offset
+        //3)Use offset to get the name
+        //4)Continue decoding and store all the data in the RR structure
+
+        unsigned short *compressMsgPointer = new unsigned short; //technically a offset, not really a pointer
+        memcpy(compressMsgPointer, buf+pointerOffSet, sizeof(short));
+        pointerOffSet += sizeof(short);
+        *compressMsgPointer = ntohs(*compressMsgPointer);
+        
+        if(*compressMsgPointer >> 14 == 0x3){
+            std::cout << "Message compression occurs!" << std::endl;
+            unsigned short offSetValue;
+            offSetValue = *compressMsgPointer;
+            //removing the first two bits inside the pointer
+            offSetValue = offSetValue << 2;
+            offSetValue = offSetValue >> 2;
+            *compressMsgPointer = offSetValue;
+        }else{
+            //Note: Not sure if msg compression does not occur, leaving this condition
+            //      in just in case if it is needed
+            std::cout << "Message compression does not occur!" << std::endl;
+        }
+        //retrieving name field with compressMsgPointer
+        int tempLength = 0;
+        int tempOffSetTracker = *compressMsgPointer; //used for temp tracing
+        int nameOffsetTracker = *compressMsgPointer;//used for iterating the name
+        while(buf[tempOffSetTracker] != '\0'){
+            tempLength++;
+            tempOffSetTracker++;
+        }
+        tempLength++;
+
+        unsigned char *name = new unsigned char[tempLength];
+        for(int inner_index = 0; inner_index < tempLength ; inner_index++){
+            // std::cout << buf[nameOffsetTracker] << std::endl;
+            name[inner_index] = buf[nameOffsetTracker];
+            nameOffsetTracker++;
+        }
+
+        //TODO: CHECK IF CONTENT IS ACUTALLY IN NAME ARRAY
+        // std::cout << "name from msg compression: " << *name << std::endl;
+        int testIndex = 0;
+        while(name[testIndex] != '\0'){
+            std::cout << "trace: " << name[testIndex] << std::endl;
+            testIndex++;
+        }
+
+    
+
+
+        
+        //TODO: FREE compressMsgpointer after getting the name and storing it somewhere
+        delete compressMsgPointer;
+
+
+        // TODO: add this back in after
         // while(buf[pointerOffSet] != '\0'){
-        //     std::cout << buf[pointerOffSet] << std::endl;
+        //     std::cout <<"loop trace: " <<buf[pointerOffSet] << " " << std::bitset<8>(buf[pointerOffSet]) << std::endl;
         //     pointerOffSet++;
         // }
+        
     }
 
 };

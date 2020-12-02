@@ -1,3 +1,5 @@
+//Author: Feng Wu
+
 #include <iostream>
 
 void printWelcomeText();

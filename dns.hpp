@@ -1,3 +1,5 @@
+//Author: Feng Wu
+
 #include "dns_struct.hpp"
 #include <cstdio>
 #include <cstdlib>

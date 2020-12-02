@@ -1,3 +1,5 @@
+//Author: Feng Wu
+
 #include <iostream>
 #include <string>
 #include <sstream> 

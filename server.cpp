@@ -1,3 +1,5 @@
+//Author: Feng Wu
+
 #include "server.hpp"
 #include "root_servers.hpp"
 #include <errno.h>
@@ -73,8 +75,8 @@ void network::Server::performAction(){
     testQuestion.qtype = htons(1);
     testQuestion.qclass = htons(1);
 
-    unsigned char *testConversion = convertHostNameToDNSField("google.com");
-    std::string domainName = "google.com";
+    unsigned char *testConversion = convertHostNameToDNSField("www.google.com");
+    std::string domainName = "www.google.com";
     unsigned char *encodedInfo = encodeDNSQuery(domainName,testHead,testQuestion);
     int totalSize = sizeof(testHead) 
     + strlen((const char*)testConversion) + 1 + sizeof(testQuestion.qclass) + sizeof(testQuestion.qtype);

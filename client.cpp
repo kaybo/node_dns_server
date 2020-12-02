@@ -1,3 +1,5 @@
+//Author: Feng Wu
+
 #include "client.hpp"
 
 network::Client::Client(std::string inputServerIpAddr, int inputPort){
