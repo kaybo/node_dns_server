@@ -95,6 +95,26 @@ struct RES_QUESTION{
 
 
 //Refer to section 4.1.3 RFC 1035
+//WARNING: Used only for decoding, use other one for actual RR 
+struct TEMP_RESOURCE_RECORD{
+    
+    //resource record type
+    unsigned short rrType;
+
+    //specifies data in rdata field
+    unsigned short rrClass;
+
+    //time to live in seconds
+    unsigned int ttl;
+
+    //length of rdata field
+    unsigned short rdlength;
+
+    //NOTE: not sure if this is correct either
+    unsigned char *rdata;
+
+};
+
 struct RESOURCE_RECORD{
     
     //domain name of the resource record

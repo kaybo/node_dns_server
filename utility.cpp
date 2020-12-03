@@ -144,6 +144,7 @@ void decodeDNSRespond(unsigned char *buf){
             offSetValue = offSetValue << 2;
             offSetValue = offSetValue >> 2;
             *compressMsgPointer = offSetValue;
+            pointerOffSet += 2;//note: assuming message compression offset is always 2 bytes
         }else{
             //Note: Not sure if msg compression does not occur, leaving this condition
             //      in just in case if it is needed
@@ -173,21 +174,20 @@ void decodeDNSRespond(unsigned char *buf){
             std::cout << "trace: " << name[testIndex] << std::endl;
             testIndex++;
         }
+        //TODO: implement answer RR?
+        TEMP_RESOURCE_RECORD *tempRR = new TEMP_RESOURCE_RECORD();
+        memcpy(tempRR, buf+pointerOffSet, sizeof(TEMP_RESOURCE_RECORD));
+        pointerOffSet += sizeof(TEMP_RESOURCE_RECORD);
+        std::cout << "debug: " << ntohs(tempRR->ttl) << std::endl;
+        //TODO: CHECK RDATA TO SEE HOW IT IS FORMATTED
+
 
     
 
 
         
         //TODO: FREE compressMsgpointer after getting the name and storing it somewhere
-        delete compressMsgPointer;
-
-
-        // TODO: add this back in after
-        // while(buf[pointerOffSet] != '\0'){
-        //     std::cout <<"loop trace: " <<buf[pointerOffSet] << " " << std::bitset<8>(buf[pointerOffSet]) << std::endl;
-        //     pointerOffSet++;
-        // }
-        
+        delete compressMsgPointer;        
     }
 
 };
