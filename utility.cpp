@@ -119,7 +119,8 @@ void decodeDNSRespond(unsigned char *buf){
     resDecodedQuestion->qtype = decodedQuestion->qtype;
     delete decodedQuestion;
 
-
+    std::cout << "before forloop execution pointeroffset: " << pointerOffSet << std::endl;
+ 
     for(int index = 0; index < decodedHeader->ancount; index++){
         //resource record name
         //TODO: IMPLEMENT THIS
@@ -133,7 +134,7 @@ void decodeDNSRespond(unsigned char *buf){
 
         unsigned short *compressMsgPointer = new unsigned short; //technically a offset, not really a pointer
         memcpy(compressMsgPointer, buf+pointerOffSet, sizeof(short));
-        pointerOffSet += sizeof(short);
+        pointerOffSet += sizeof(unsigned short);
         *compressMsgPointer = ntohs(*compressMsgPointer);
         
         if(*compressMsgPointer >> 14 == 0x3){
@@ -144,7 +145,8 @@ void decodeDNSRespond(unsigned char *buf){
             offSetValue = offSetValue << 2;
             offSetValue = offSetValue >> 2;
             *compressMsgPointer = offSetValue;
-            pointerOffSet += 2;//note: assuming message compression offset is always 2 bytes
+            pointerOffSet += 0;//note: assuming message compression offset is always 2 bytes
+            std::cout << "message compression offset value: " << offSetValue << std::endl;
         }else{
             //Note: Not sure if msg compression does not occur, leaving this condition
             //      in just in case if it is needed
@@ -176,18 +178,40 @@ void decodeDNSRespond(unsigned char *buf){
         }
         //TODO: implement answer RR?
         TEMP_RESOURCE_RECORD *tempRR = new TEMP_RESOURCE_RECORD();
+        std::cout << "debug before memcpy pointeroffset: "<< pointerOffSet << std::endl;
         memcpy(tempRR, buf+pointerOffSet, sizeof(TEMP_RESOURCE_RECORD));
-        pointerOffSet += sizeof(TEMP_RESOURCE_RECORD);
-        std::cout << "debug: " << ntohs(tempRR->ttl) << std::endl;
-        //TODO: CHECK RDATA TO SEE HOW IT IS FORMATTED
 
+        unsigned char *debugArray = new unsigned char[10];
+
+        memcpy(debugArray, buf+pointerOffSet, 10);
+        for(int test_index = 0 ; test_index < 10; test_index++){
+            std::cout << "real debug dude(no ntohs): " << std::bitset<8>(debugArray[test_index]) << std::endl;
+        }
+
+
+        pointerOffSet += sizeof(TEMP_RESOURCE_RECORD);
+        std::cout << "debug rrType: " << ntohs(tempRR->rrType)<<" " << std::bitset<16>(ntohs(tempRR->rrType))<< std::endl;
+        std::cout << "debug rrClass: " << ntohs(tempRR->rrClass) <<" " << std::bitset<16>(ntohs(tempRR->rrClass)) << std::endl;
+        std::cout << "debug ttl: " << ntohl(tempRR->ttl) << " " << std::bitset<32>(ntohs(tempRR->ttl)) <<std::endl;
+        std::cout << "debug rdlength: " << ntohs(tempRR->rdlength) <<" " << std::bitset<16>(ntohs(tempRR->rdlength)) << std::endl;
+
+
+
+        std::cout << "end of debug for iteration" << std::endl;
+
+        //TODO: CHECK RDATA TO SEE HOW IT IS FORMATTED
+        // unsigned int ipAddress;
+        // memcpy(&ipAddress, buf+pointerOffSet, sizeof(unsigned int));
+        // std::cout << "this is IP address: " << ipAddress << std::endl;
+        // pointerOffSet += sizeof(unsigned int);
 
     
 
 
         
         //TODO: FREE compressMsgpointer after getting the name and storing it somewhere
-        delete compressMsgPointer;        
+        delete compressMsgPointer;     
+        break;   
     }
 
 };

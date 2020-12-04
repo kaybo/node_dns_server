@@ -105,13 +105,13 @@ struct TEMP_RESOURCE_RECORD{
     unsigned short rrClass;
 
     //time to live in seconds
-    unsigned int ttl;
+    uint32_t ttl;
 
     //length of rdata field
     unsigned short rdlength;
 
     //NOTE: not sure if this is correct either
-    unsigned char *rdata;
+    // unsigned char *rdata;
 
 };
 
@@ -127,7 +127,7 @@ struct RESOURCE_RECORD{
     unsigned short rrClass;
 
     //time to live in seconds
-    unsigned int ttl;
+    uint32_t ttl;
 
     //length of rdata field
     unsigned short rdlength;
