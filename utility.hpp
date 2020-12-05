@@ -26,6 +26,10 @@ unsigned char *convertHostNameToDNSField(std::string inputString);
 //string contains "3www4test3com0"  becomes "www.test.com"
 std::string convertDNSFieldToHostName(unsigned char field);
 
+//Special case usage for uncompressing domain names inside decodeDNSResponse()
+//Must not use in else where
+void messageDecompression(unsigned char *buf, unsigned char *nameServerDomain);
+
 //Encodes the dnsquery and returns an encoded array ready to be sent over udp to other servers
 unsigned char *encodeDNSQuery(std::string domainName, HEADER dnsHeader, QUESTION dnsQuestion);
 

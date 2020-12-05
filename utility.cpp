@@ -1,7 +1,7 @@
 //Author: Feng Wu
 
 #include "utility.hpp"
-
+#include "constants.hpp"
 
 
 unsigned char *convertHostNameToDNSField(std::string inputString){
@@ -35,6 +35,48 @@ unsigned char *convertHostNameToDNSField(std::string inputString){
 //TODO: Implement this!
 std::string convertDNSFieldToHostName(unsigned char field){
     return "test";
+};
+
+//TODO: IMPLEMENT THIS!
+void messageDecompression(unsigned char *buf, unsigned char *nameServerDomain, unsigned short length){
+    //loop thru nameServerDomain
+    //if not message compression
+    //add to list
+    //if is message compression
+    //expand and add into list
+    //after iterating, iterate list again and turn it back into unsigned char array then array
+    //that array
+    // std::cout << "=======EXECUTED===========: "<< std::endl;
+    std::list<unsigned char> uncompressedList;
+    unsigned short index = 0;
+    while(index < length){
+        unsigned char currentChar = nameServerDomain[index];
+        std::cout << "=======currentchar===========: "<< currentChar<<" "<<std::bitset<8>(currentChar) <<std::endl;
+        if(currentChar >> 6 == 0x3){
+            unsigned short offSetValue;
+            memcpy(&offSetValue, nameServerDomain+index, 2);
+            offSetValue = ntohs(offSetValue);
+            offSetValue = offSetValue << 2;
+            offSetValue = offSetValue >> 2;
+            std::cout << "=======messageDecompression===========: "<< offSetValue << " " << std::bitset<16>(offSetValue)<< std::endl;
+            // unsigned short bufIndex = 0;
+            while(buf[offSetValue] != '\0'){
+                std::cout << "=======while loop:===========: "<< buf[offSetValue] << " " << std::bitset<8>(buf[offSetValue])<< std::endl;
+                uncompressedList.push_back(buf[offSetValue]);
+                offSetValue++;
+            }
+            index ++;
+            index ++;
+        }else{
+            uncompressedList.push_back(currentChar);
+            index++;
+        }
+    }
+    for(unsigned char t:uncompressedList){
+        std::cout << "============new lis===========: " << t << std::endl;
+    }
+
+
 };
 
 //TODO: do htons instead of letting user doing it
@@ -74,6 +116,8 @@ unsigned char *encodeDNSQuery(std::string domainName, HEADER dnsHeader, QUESTION
 
 void decodeDNSRespond(unsigned char *buf){
     std::cout << "Decoding function running" << std::endl;
+    DECODED_RESPONSE *returnInformation = new DECODED_RESPONSE();
+
     int pointerOffSet = 0;
 
     HEADER *decodedHeader = new HEADER();
@@ -120,8 +164,26 @@ void decodeDNSRespond(unsigned char *buf){
     delete decodedQuestion;
 
     std::cout << "before forloop execution pointeroffset: " << pointerOffSet << std::endl;
- 
-    for(int index = 0; index < decodedHeader->ancount; index++){
+    
+    //appending head and question before decoding RRs
+    returnInformation->head = *decodedHeader;
+    returnInformation->question = *decodedQuestion;
+
+    std::list<RESOURCE_RECORD> *decodedAnswerList = new std::list<RESOURCE_RECORD>();
+    std::list<RESOURCE_RECORD> *decodedAuthNameServerList = new std::list<RESOURCE_RECORD>();
+    std::list<RESOURCE_RECORD> *decodedAdditionalList = new std::list<RESOURCE_RECORD>();
+
+    int totalRRCount = decodedHeader->ancount + decodedHeader->nscount + decodedHeader->arcount;
+
+    int answerCount = returnInformation->head.ancount;
+    int nsCount = returnInformation->head.nscount;
+    int additionalCount = returnInformation->head.arcount;
+
+    //debuging code here
+    int debug = 2;
+    //================
+
+    for(int index = 0; index < totalRRCount; index++){
         //resource record name
         //TODO: IMPLEMENT THIS
 
@@ -134,10 +196,10 @@ void decodeDNSRespond(unsigned char *buf){
 
         unsigned short *compressMsgPointer = new unsigned short; //technically a offset, not really a pointer
         memcpy(compressMsgPointer, buf+pointerOffSet, sizeof(short));
-        pointerOffSet += sizeof(unsigned short);
+        pointerOffSet += sizeof(unsigned short);//===TODO===: might need to change this later due to msg compresssion feature
         *compressMsgPointer = ntohs(*compressMsgPointer);
         
-        if(*compressMsgPointer >> 14 == 0x3){
+        if(*compressMsgPointer >> 14 == 0x3){//This is incorrect I think?
             std::cout << "Message compression occurs!" << std::endl;
             unsigned short offSetValue;
             offSetValue = *compressMsgPointer;
@@ -145,12 +207,10 @@ void decodeDNSRespond(unsigned char *buf){
             offSetValue = offSetValue << 2;
             offSetValue = offSetValue >> 2;
             *compressMsgPointer = offSetValue;
-            pointerOffSet += 0;//note: assuming message compression offset is always 2 bytes
-            std::cout << "message compression offset value: " << offSetValue << std::endl;
         }else{
             //Note: Not sure if msg compression does not occur, leaving this condition
             //      in just in case if it is needed
-            std::cout << "Message compression does not occur!" << std::endl;
+            std::cout << "Message compression does =========not======= occur!" << std::endl;
         }
         //retrieving name field with compressMsgPointer
         int tempLength = 0;
@@ -164,54 +224,104 @@ void decodeDNSRespond(unsigned char *buf){
 
         unsigned char *name = new unsigned char[tempLength];
         for(int inner_index = 0; inner_index < tempLength ; inner_index++){
-            // std::cout << buf[nameOffsetTracker] << std::endl;
             name[inner_index] = buf[nameOffsetTracker];
             nameOffsetTracker++;
         }
 
-        //TODO: CHECK IF CONTENT IS ACUTALLY IN NAME ARRAY
-        // std::cout << "name from msg compression: " << *name << std::endl;
+        //CHECKING IF CONTENT IS ACUTALLY IN NAME ARRAY
         int testIndex = 0;
         while(name[testIndex] != '\0'){
             std::cout << "trace: " << name[testIndex] << std::endl;
             testIndex++;
         }
+        std::cout << "pointeroffset before TMEP_RESOURCE_RECORD: " << pointerOffSet << std::endl;
         //TODO: implement answer RR?
         TEMP_RESOURCE_RECORD *tempRR = new TEMP_RESOURCE_RECORD();
-        std::cout << "debug before memcpy pointeroffset: "<< pointerOffSet << std::endl;
         memcpy(tempRR, buf+pointerOffSet, sizeof(TEMP_RESOURCE_RECORD));
+        tempRR->rrClass = ntohs(tempRR->rrClass);
+        tempRR->rrType = ntohs(tempRR->rrType);
+        tempRR->ttl = ntohl(tempRR->ttl);
+        tempRR->rdlength = ntohs(tempRR->rdlength);
+ 
+        pointerOffSet += 10;//warning: could not use sizeof(TEMP_RESOURCE_RECORD) due to padding issues
+        std::cout << "debug rrType: " << tempRR->rrType<< std::endl;
+        std::cout << "debug rrClass: " << tempRR->rrClass  << std::endl;
+        std::cout << "debug ttl: " << tempRR->ttl <<std::endl;
+        std::cout << "debug rdlength: " << tempRR->rdlength << " "<<std::bitset<16>(tempRR->rdlength) << std::endl;
 
-        unsigned char *debugArray = new unsigned char[10];
 
-        memcpy(debugArray, buf+pointerOffSet, 10);
-        for(int test_index = 0 ; test_index < 10; test_index++){
-            std::cout << "real debug dude(no ntohs): " << std::bitset<8>(debugArray[test_index]) << std::endl;
+        RESOURCE_RECORD decodedRR;
+        //TODO: add rrName later once message compression has all been figured out(Added)
+        decodedRR.rrName = name; //NOTE: this might not work, need to test this first!!!
+
+        decodedRR.rrType = tempRR->rrType;
+        decodedRR.rrClass = tempRR->rrClass;
+        decodedRR.ttl = tempRR->ttl;
+        decodedRR.rdlength = tempRR->rdlength;
+
+        delete tempRR;
+
+        //TODO: check which type
+        //Note: Ignores all IPV6 address because this is a IPV4 implementation
+        std::cout <<"pointeroffset before checking type:  " << pointerOffSet << std::endl;
+        if(decodedRR.rrType == A){
+            std::cout << "RR type A" << std::endl;
+            unsigned char *ipAddress = new unsigned char[4];
+            memcpy(ipAddress, buf + pointerOffSet, decodedRR.rdlength);
+
+            for(int test = 0 ; test < decodedRR.rdlength ; test++){
+                std::cout << "debug NS: " << ipAddress[test] << " " <<std::bitset<8>(ipAddress[test]) << std::endl;
+            }
+            decodedRR.rdata = ipAddress;
+        }else if(decodedRR.rrType == NS){
+            std::cout << "RR type NS" << std::endl;
+            unsigned char *nameServerDomain = new unsigned char [decodedRR.rdlength];
+            memcpy(nameServerDomain, buf + pointerOffSet, decodedRR.rdlength);
+            for(int test = 0 ; test < decodedRR.rdlength ; test++){
+                std::cout << "debug NS: " << nameServerDomain[test] << " " <<std::bitset<8>(nameServerDomain[test]) << std::endl;
+            }
+            messageDecompression(buf, nameServerDomain, decodedRR.rdlength);
+            //TODO: need to add message compression to find the actual NS domain before storing it
+            //      into rdata
+        }else if(decodedRR.rrType == CNAME){
+            std::cout << "RR type CNAME" << std::endl;
+        }else if(decodedRR.rrType == SOA){
+            std::cout << "RR type SOA" << std::endl;
+        }else if(decodedRR.rrType == PTR){
+            std::cout << "RR type PTR" << std::endl;
+        }else{
+            std::cout << "none of the RR type has been matched" << std::endl;
+            //TODO: decrement the specific count fields because of ignoring them
         }
+        pointerOffSet += decodedRR.rdlength;
 
 
-        pointerOffSet += sizeof(TEMP_RESOURCE_RECORD);
-        std::cout << "debug rrType: " << ntohs(tempRR->rrType)<<" " << std::bitset<16>(ntohs(tempRR->rrType))<< std::endl;
-        std::cout << "debug rrClass: " << ntohs(tempRR->rrClass) <<" " << std::bitset<16>(ntohs(tempRR->rrClass)) << std::endl;
-        std::cout << "debug ttl: " << ntohl(tempRR->ttl) << " " << std::bitset<32>(ntohs(tempRR->ttl)) <<std::endl;
-        std::cout << "debug rdlength: " << ntohs(tempRR->rdlength) <<" " << std::bitset<16>(ntohs(tempRR->rdlength)) << std::endl;
-
-
-
+        if(answerCount > 0){
+            decodedAnswerList->push_back(decodedRR);
+            answerCount--;
+        }else if(nsCount > 0){
+            decodedAuthNameServerList->push_back(decodedRR);
+            nsCount--;
+        }else if(additionalCount > 0){
+            decodedAdditionalList->push_back(decodedRR);
+            additionalCount--;
+        }
+        delete compressMsgPointer;   
         std::cout << "end of debug for iteration" << std::endl;
-
-        //TODO: CHECK RDATA TO SEE HOW IT IS FORMATTED
-        // unsigned int ipAddress;
-        // memcpy(&ipAddress, buf+pointerOffSet, sizeof(unsigned int));
-        // std::cout << "this is IP address: " << ipAddress << std::endl;
-        // pointerOffSet += sizeof(unsigned int);
-
-    
-
-
-        
-        //TODO: FREE compressMsgpointer after getting the name and storing it somewhere
-        delete compressMsgPointer;     
-        break;   
+  
+        if(debug < index){
+            break; 
+        }
+          
     }
 
+            for (RESOURCE_RECORD n : *decodedAnswerList) {
+                std::cout << n.ttl << '\n';
+            }
+    returnInformation->answer = *decodedAnswerList;
+    returnInformation->authNameServer = *decodedAuthNameServerList;
+    returnInformation->additional = *decodedAnswerList;
+    // return returnInformation;
+
 };
+

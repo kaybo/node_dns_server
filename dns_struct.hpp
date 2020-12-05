@@ -1,3 +1,6 @@
+#include <iostream>
+#include <list>
+
 //Author: Feng Wu
 
 //Specifies the structure used for DNS queries
@@ -115,6 +118,7 @@ struct TEMP_RESOURCE_RECORD{
 
 };
 
+//This one is used for the actual RR
 struct RESOURCE_RECORD{
     
     //domain name of the resource record
@@ -134,5 +138,15 @@ struct RESOURCE_RECORD{
 
     //NOTE: not sure if this is correct either
     unsigned char *rdata;
+
+};
+
+//used for getting the decoded reply
+struct DECODED_RESPONSE{
+    HEADER head;
+    QUESTION question;
+    std::list<RESOURCE_RECORD> answer;
+    std::list<RESOURCE_RECORD> authNameServer;
+    std::list<RESOURCE_RECORD> additional;
 
 };
