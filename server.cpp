@@ -21,7 +21,8 @@ void network::Server::createSocket(){
     }else{
         hint.sin_family = AF_INET;
         hint.sin_port = htons(servPort);
-        inet_pton(AF_INET, "127.0.0.1", &hint.sin_addr);
+        //Todo: Need to change this to support local and other IP addresses
+        inet_pton(AF_INET, "127.0.0.1", &hint.sin_addr); 
 
         //binding socket
         if(bind(listener, (sockaddr*)&hint, sizeof(hint)) == -1){
@@ -75,8 +76,8 @@ void network::Server::performAction(){
     testQuestion.qtype = htons(1);
     testQuestion.qclass = htons(1);
 
-    unsigned char *testConversion = convertHostNameToDNSField("sfu.ca");
-    std::string domainName = "sfu.ca";
+    unsigned char *testConversion = convertHostNameToDNSField("google.com");
+    std::string domainName = "google.com";
     unsigned char *encodedInfo = encodeDNSQuery(domainName,testHead,testQuestion);
     int totalSize = sizeof(testHead) 
     + strlen((const char*)testConversion) + 1 + sizeof(testQuestion.qclass) + sizeof(testQuestion.qtype);
@@ -117,7 +118,8 @@ void network::Server::performAction(){
                 &len); 
         std::cout << "retrieve successful? " << std::endl; 
 
-        decodeDNSRespond(buffer);
+        DECODED_RESPONSE *testRes = decodeDNSRespond(buffer);
+        printDecodedResponse(*testRes);
     }
 
 
