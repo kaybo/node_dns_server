@@ -64,7 +64,7 @@ void network::Server::performAction(){
     //left out aa for now: teadHead.aa
 
     //TODO: NEED TO FIX HEADER AGAIN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    testHead.rd = 0x1;
+    testHead.rd = 0x0;
 
     testHead.qdcount = htons(1);
     testHead.ancount = htons(0);

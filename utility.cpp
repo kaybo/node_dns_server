@@ -183,8 +183,13 @@ unsigned char *messageDecompression(unsigned char *buf, unsigned char *nameServe
                 offSetValue++;
                 
             }
-            index ++;
-            index ++;
+            // index ++;
+            // index ++;
+            //sometimes, there are additional message compression pointer after another
+            //Implementation already has taken care of it so no need to continue decompressing.
+            //Otherwise, it'll be duplicates, index+=2 is not needed unless problems occur later.
+            //Then refactor will be needed in this particular section.
+            break;
         }else{
             uncompressedList.push_back(currentChar);
             index++;
@@ -346,11 +351,10 @@ DECODED_RESPONSE *decodeDNSRespond(unsigned char *buf){
         }
         tempLength++;
 
-        
-
         unsigned char *tempName = new unsigned char[tempLength];
         for(int inner_index = 0; inner_index < tempLength ; inner_index++){
             tempName[inner_index] = buf[nameOffsetTracker];
+            std::cout << "============tempName=========: " << tempName[inner_index] << " " << std::bitset<8>(tempName[inner_index]) << std::endl;
             nameOffsetTracker++;
         }
 
@@ -441,6 +445,7 @@ DECODED_RESPONSE *decodeDNSRespond(unsigned char *buf){
             //TODO:may need to decrement AAA types and add type checking here
             if(decodedRR.rrType != AAA){
                 decodedAdditionalList->push_back(decodedRR);
+                returnInformation->head.arcount--;
             }
             additionalCount--;
         }
