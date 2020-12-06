@@ -76,8 +76,8 @@ void network::Server::performAction(){
     testQuestion.qtype = htons(1);
     testQuestion.qclass = htons(1);
 
-    unsigned char *testConversion = convertHostNameToDNSField("google.com");
-    std::string domainName = "google.com";
+    unsigned char *testConversion = convertHostNameToDNSField("sfu.ca");
+    std::string domainName = "sfu.ca";
     unsigned char *encodedInfo = encodeDNSQuery(domainName,testHead,testQuestion);
     int totalSize = sizeof(testHead) 
     + strlen((const char*)testConversion) + 1 + sizeof(testQuestion.qclass) + sizeof(testQuestion.qtype);

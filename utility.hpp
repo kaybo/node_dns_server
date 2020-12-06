@@ -35,6 +35,12 @@ void printDecodedResponse(DECODED_RESPONSE res);
 //prints all content inside resource record
 void printResourceRecord(RESOURCE_RECORD rr);
 
+//print the header
+void printHeader(HEADER head);
+
+//print res_question struct
+void printResQuestion(RES_QUESTION resQ);
+
 //Special case usage for uncompressing domain names inside decodeDNSResponse()
 //Must not use in else where
 unsigned char *messageDecompression(unsigned char *buf, unsigned char *nameServerDomain, unsigned short length);

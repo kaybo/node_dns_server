@@ -44,59 +44,111 @@ std::string convertUnsignedCharToIPAdress(unsigned char *data){
     return returnValue;
 };
 
-//TODO: Implement this!
+//todo: remove the comments
 std::string convertSequenceLabelToHostName(unsigned char *field){
+    //=====debug
+    int test = 0;
+    while(field[test] != '\0'){
+        // std::cout << "**************DEBUG***********: " << field[test] << std::bitset<8>(field[test]) <<std::endl;
+        test++;
+    }
+    //==========
     unsigned short index = 0;
     unsigned short dotIndex = 0;
     std::string returnString = "";
     while(field[index] != '\0'){
         if(index == 0){
+            // std::cout << "**************INDEX==0***********: "  << index << std::endl;
             dotIndex = field[index] + 1;
         }else{
             if(dotIndex == index){
+                //  std::cout << "**************dotIndex == INDEX***********: "  << index << std::endl;
                 returnString += ".";
                 dotIndex = field[index] + index + 1;
             }else{
+                //  std::cout << "**************else,else***********: "  << index << std::endl;
                 returnString += field[index];
             }
         }
         index++;
     }
+    // std::cout << "returnstring:" << returnString << std::endl;
     return returnString;
 };
 
 void printDecodedResponse(DECODED_RESPONSE res){
-    std::cout << "printDecodedResponse executed" <<std::endl;
+    std::cout << "=========Print Decoded Response=========" << std::endl;
+    std::cout << "*******Header Section********" << std::endl;
+    printHeader(res.head);
+    std::cout << "****************************" << std::endl;
+    std::cout << "******Question Section*******" << std::endl;
+    printResQuestion(res.question);
+    std::cout << "****************************" << std::endl;
+    std::cout << "*******Answer Section*******" << std::endl;
+    for(RESOURCE_RECORD rr: res.answer){
+        printResourceRecord(rr);
+    }
+    std::cout << "*********************************" << std::endl;
+    std::cout << "********Authority Section*******" << std::endl;
+    for(RESOURCE_RECORD rr: res.authNameServer){
+        printResourceRecord(rr);
+    }
+    std::cout << "***********************************" << std::endl;
+    std::cout << "*******Additional Section*********" << std::endl;
     for(RESOURCE_RECORD rr: res.additional){
         printResourceRecord(rr);
-        // break;
     }
-    // for(RESOURCE_RECORD rr: res.authNameServer){
-    //     printResourceRecord(rr);
-    //     // break;
-    // }
+    std::cout << "**********************************" << std::endl;
+    std::cout << "=========================================" << std::endl;
 };
 
 void printResourceRecord(RESOURCE_RECORD rr){
-    std::cout << "printResourceRecord executed" <<std::endl;
+    std::cout << ".......Resource Record......." << std::endl;
     std::string convertedRRName = convertSequenceLabelToHostName(rr.rrName);
     std::cout << "Name: " << convertedRRName << std::endl;
     std::cout << "Type: " << rr.rrType << std::endl; 
     std::cout << "Class: " << rr.rrClass << std::endl;
-    std::cout << "Time to live: " << rr.ttl << std::endl;
-    std::cout << "Data Length: " << rr.rdlength << " (seconds)"<<std::endl;
+    std::cout << "Time to live: " << rr.ttl << " (seconds)" << std::endl;
+    std::cout << "Data Length: " << rr.rdlength <<std::endl;
 
     if(rr.rrType == A){
         std::string ipAdress = convertUnsignedCharToIPAdress(rr.rdata);
         std::cout << "IP Adress: " << ipAdress << std::endl;
     }else if(rr.rrType == NS){
         std::string convertedData = convertSequenceLabelToHostName(rr.rdata);
-        std::cout << "Name Server: " << convertedRRName << std::endl;
+        std::cout << "Name Server: " << convertedData << std::endl;
     }else{
         std::cout << "unformatted data" << std::endl;
     }
+    std::cout << ".............................." << std::endl;
 
+};
 
+void printResQuestion(RES_QUESTION resQ){
+    std::string convertedQName = convertSequenceLabelToHostName(resQ.qname);
+    std::cout << "Question Name: " << convertedQName << std::endl;
+    std::cout << "Query Type: " << resQ.qtype << std::endl;
+    std::cout << "Query Class: " << resQ.qclass << std::endl;
+};
+
+void printHeader(HEADER head){
+    std::cout << "Transaction ID: " << head.id << std::endl;
+    std::cout << "Query/Response: " << std::bitset<1>(head.qr) << std::endl;
+    std::cout << "Opcode: " << std::bitset<4>(head.opcode) << std::endl;
+    std::cout << "Authoritative Answer: " << std::bitset<1>(head.aa) << std::endl;
+    std::cout << "Truncated: " << std::bitset<1>(head.tc) << std::endl;
+    std::cout << "Recursion Desired: " << std::bitset<1>(head.rd) << std::endl;
+    std::cout << "Recursion Available: " << std::bitset<1>(head.ra) << std::endl;
+    std::cout << "Z: " << std::bitset<1>(head.z) << std::endl;
+    std::cout << "Authenticated Data: " << std::bitset<1>(head.ad) << std::endl;
+    std::cout << "Checking Disabled: " << std::bitset<1>(head.cd) << std::endl;
+    std::cout << "Rcode: " << std::bitset<4>(head.rcode) << std::endl;
+    std::cout << "Question Count: " << head.qdcount << std::endl;
+    std::cout << "Answer Resource Records: " << head.ancount << std::endl;
+    std::cout << "Authority Resource Records: " << head.nscount << std::endl;
+    std::cout << "Additional Resource Records: " << head.arcount << std::endl;
+
+    
 };
 
 unsigned char *messageDecompression(unsigned char *buf, unsigned char *nameServerDomain, unsigned short length){
@@ -238,7 +290,7 @@ DECODED_RESPONSE *decodeDNSRespond(unsigned char *buf){
     
     //appending head and question before decoding RRs
     returnInformation->head = *decodedHeader;
-    returnInformation->question = *decodedQuestion;
+    returnInformation->question = *resDecodedQuestion;
 
     std::list<RESOURCE_RECORD> *decodedAnswerList = new std::list<RESOURCE_RECORD>();
     std::list<RESOURCE_RECORD> *decodedAuthNameServerList = new std::list<RESOURCE_RECORD>();
@@ -357,12 +409,13 @@ DECODED_RESPONSE *decodeDNSRespond(unsigned char *buf){
                 std::cout << "debug NS NS type: " << nameServerDomain[test] << " " <<std::bitset<8>(nameServerDomain[test]) << std::endl;
             }
             unsigned char* decompressedNameServerDomain = messageDecompression(buf, nameServerDomain, decodedRR.rdlength);
+            
+            decodedRR.rdata = decompressedNameServerDomain;
             int test_index = 0;
-            while(decompressedNameServerDomain[test_index] != '\0'){
-                std::cout << "decompressed message debugging: " << decompressedNameServerDomain[test_index]<< " " << std::bitset<8>(decompressedNameServerDomain[test_index]) << std::endl;
+            while(decodedRR.rdata[test_index] != '\0'){
+                std::cout << "=======decompressed message debugging using decodedRR=======: " << decodedRR.rdata[test_index]<< " " << std::bitset<8>(decodedRR.rdata[test_index]) << std::endl;
                 test_index++;
             }
-            decodedRR.rdata = decompressedNameServerDomain;
             std::cout << "=============decompress while loop finished executing?" <<std::endl;
     
         }else if(decodedRR.rrType == CNAME){
@@ -385,7 +438,10 @@ DECODED_RESPONSE *decodeDNSRespond(unsigned char *buf){
             decodedAuthNameServerList->push_back(decodedRR);
             nsCount--;
         }else if(additionalCount > 0){
-            decodedAdditionalList->push_back(decodedRR);
+            //TODO:may need to decrement AAA types and add type checking here
+            if(decodedRR.rrType != AAA){
+                decodedAdditionalList->push_back(decodedRR);
+            }
             additionalCount--;
         }
         delete compressMsgPointer;   

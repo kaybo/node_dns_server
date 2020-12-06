@@ -144,7 +144,7 @@ struct RESOURCE_RECORD{
 //used for getting the decoded reply
 struct DECODED_RESPONSE{
     HEADER head;
-    QUESTION question;
+    RES_QUESTION question;
     std::list<RESOURCE_RECORD> answer;
     std::list<RESOURCE_RECORD> authNameServer;
     std::list<RESOURCE_RECORD> additional;
