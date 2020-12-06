@@ -1,4 +1,6 @@
 //Author: Feng Wu
+#ifndef CONSTANT_H
+#define CONSTANT_H
 
 #include <iostream>
 
@@ -13,3 +15,5 @@ static unsigned short SOA = 6;
 static unsigned short PTR = 12;
 
 static unsigned short AAA = 28;
+
+#endif 

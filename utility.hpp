@@ -14,6 +14,7 @@
 #include <bitset>
 #include "dns_struct.hpp"
 
+
 //converts string hostname into DNS format field 
 //note: allocates memory on heap for the returned unsigned char array
 //example use case:

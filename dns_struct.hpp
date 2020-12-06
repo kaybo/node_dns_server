@@ -1,3 +1,6 @@
+#ifndef DNS_STRUCT_H
+#define DNS_STRUCT_H
+
 #include <iostream>
 #include <list>
 
@@ -150,3 +153,5 @@ struct DECODED_RESPONSE{
     std::list<RESOURCE_RECORD> additional;
 
 };
+
+#endif 

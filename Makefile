@@ -3,8 +3,8 @@ all: dns_client dns_server
 dns_client: dns_client.o client_handler.o client.o
 	g++ dns_client.o client_handler.o client.o -o client
 
-dns_server: dns_server.o server.o utility.o
-	g++ dns_server.o server.o utility.o -o server
+dns_server: dns_server.o server.o utility.o dns.o
+	g++ dns_server.o server.o utility.o dns.o -o server
 
 dns_client.o: dns_client.cpp
 	g++ -c dns_client.cpp
@@ -23,6 +23,9 @@ dns_server.o:
 
 server.o:
 	g++ -c server.cpp
+
+dns.o:
+	g++ -c dns.cpp
 
 clean:
 	rm *.o client server
