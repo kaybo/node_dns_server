@@ -54,7 +54,7 @@ void network::Server::initializeListener(){
 };
 
 void network::Server::performAction(){
-    std::string searchingDomainName = "google.com";
+    std::string searchingDomainName = "baidu.com";
 
     
     DECODED_RESPONSE *query;
@@ -62,28 +62,68 @@ void network::Server::performAction(){
 
     //replicating do while loop
     std::string destAddress = A_ROOT;
-    std::string selectedDomainName = "google.com";
+    std::string selectedDomainName = searchingDomainName;
     query = dnsSendQuery(selectedDomainName, destAddress);
     printDecodedResponse(*query);
-
+    std::string resolvedAdress;
     int flag = 0;
     int matchingTempNameAndNameServer = 0;
     while(query->answer.size() == 0 || flag == 1){
         std::cout << std::endl << "<><><><><>New Query<><><><><>" << std::endl << std::endl;
         if(query->authNameServer.size() > 0 && query->additional.size() == 0){
             // std::cout << std::endl << "<><><><><>if statement<><><><><>" << std::endl << std::endl;
-            flag = 1;
-            RESOURCE_RECORD tempRR;
-            for(RESOURCE_RECORD authRR: query->authNameServer){
-                tempRR = authRR;
-                break;
+            if(resolvedAdress.empty()){
+                flag = 1;
+                RESOURCE_RECORD tempRR;
+                for(RESOURCE_RECORD authRR: query->authNameServer){
+                    tempRR = authRR;
+                    break;
+                }
+                selectedDomainName = convertSequenceLabelToHostName(tempRR.rdata);
+                destAddress = A_ROOT;
+            }else{
+                destAddress = resolvedAdress;
+                selectedDomainName = searchingDomainName;
             }
-            selectedDomainName = convertSequenceLabelToHostName(tempRR.rdata);
-            destAddress = A_ROOT;
+            
         }else{
-            // std::cout << std::endl << "<><><><><>else statement<><><><><>" << std::endl << std::endl;
+            
             if(flag == 1){
-                
+                if(query->answer.size() > 0){
+                    std::cout << std::endl << "<><><><><>ayayayyaayay<><><><><>" << std::endl << std::endl;
+                    flag = 0;
+                    
+                    for(RESOURCE_RECORD answerRR: query->answer){
+                        resolvedAdress = convertUnsignedCharToIPAdress(answerRR.rdata);
+                        break;
+                    }
+                    selectedDomainName = searchingDomainName;
+                }else{
+                    RESOURCE_RECORD tempAdditionalRR;
+                    for(RESOURCE_RECORD authRR: query->authNameServer){
+                        
+                        // RESOURCE_RECORD tempAuthRR = authRR;
+                        std::string tempNameServer;
+                        tempNameServer = convertSequenceLabelToHostName(authRR.rdata);
+                        
+                        for(RESOURCE_RECORD additionalRR: query->additional){
+                            std::string tempName = convertSequenceLabelToHostName(authRR.rdata);
+                            // std::cout << std::endl << "<><><><><>lala<><><><><>" << std::endl << std::endl;
+                            std::cout << tempName << " " << tempNameServer << std::endl;
+                            if(tempName.compare(tempNameServer) == 0){
+                                tempAdditionalRR = additionalRR;
+                                // std::cout << "BREAKING SON!" << std::endl;
+                                matchingTempNameAndNameServer = 1;
+                                break;
+                            }
+                        }
+                        if(matchingTempNameAndNameServer == 1){
+                            break;
+                        }
+
+                    }
+                    destAddress = convertUnsignedCharToIPAdress(tempAdditionalRR.rdata);
+                }
             }else if(flag == 0){
                 // std::cout << std::endl << "<><><><><>else, else if<><><><><>" << std::endl << std::endl;
                 RESOURCE_RECORD tempAdditionalRR;
