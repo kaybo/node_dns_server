@@ -12,6 +12,7 @@
 #include <netdb.h>
 #include <iostream>
 #include "cache.hpp"
+#include "constants.hpp"
 
 namespace network{
     class Server

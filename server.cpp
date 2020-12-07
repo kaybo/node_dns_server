@@ -54,8 +54,10 @@ void network::Server::initializeListener(){
 };
 
 void network::Server::performAction(){
-    std::string searchingDomainName = "baidu.com";
 
+    std::string searchingDomainName = "mihoyo.com";
+
+cNameLabel:
     
     DECODED_RESPONSE *query;
     // printDecodedResponse(*query);
@@ -68,6 +70,8 @@ void network::Server::performAction(){
     std::string resolvedAdress;
     int flag = 0;
     int matchingTempNameAndNameServer = 0;
+
+
     while(query->answer.size() == 0 || flag == 1){
         std::cout << std::endl << "<><><><><>New Query<><><><><>" << std::endl << std::endl;
         if(query->authNameServer.size() > 0 && query->additional.size() == 0){
@@ -154,8 +158,20 @@ void network::Server::performAction(){
             matchingTempNameAndNameServer == 0;
         }
         std::cout << "**********$@_$*#@()%*#@)(%*)@#%@#%#@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" <<std::endl;
+        
         query = dnsSendQuery(selectedDomainName, destAddress);
         printDecodedResponse(*query);
+        RESOURCE_RECORD tempAnswerRR;
+        for(RESOURCE_RECORD answerRR: query->answer){
+            tempAnswerRR = answerRR;
+            break;
+        }
+        if(tempAnswerRR.rrType == CNAME){
+            searchingDomainName = convertSequenceLabelToHostName(tempAnswerRR.rdata);
+            goto cNameLabel;
+        }
+        printDecodedResponse(*query);
+        
 
     }
 

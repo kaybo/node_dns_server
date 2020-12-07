@@ -117,6 +117,9 @@ void printResourceRecord(RESOURCE_RECORD rr){
     }else if(rr.rrType == NS){
         std::string convertedData = convertSequenceLabelToHostName(rr.rdata);
         std::cout << "Name Server: " << convertedData << std::endl;
+    }else if(rr.rrType == CNAME){
+        std::string convertedData = convertSequenceLabelToHostName(rr.rdata);
+        std::cout << "Canonical Name: " << convertedData << std::endl;     
     }else{
         std::cout << "unformatted data" << std::endl;
     }
@@ -424,6 +427,9 @@ DECODED_RESPONSE *decodeDNSRespond(unsigned char *buf){
     
         }else if(decodedRR.rrType == CNAME){
             std::cout << "RR type CNAME" << std::endl;
+            unsigned char *cName = new unsigned char[decodedRR.rdlength];
+            memcpy(cName, buf+pointerOffSet, decodedRR.rdlength);
+            decodedRR.rdata = cName;
         }else if(decodedRR.rrType == SOA){
             std::cout << "RR type SOA" << std::endl;
         }else if(decodedRR.rrType == PTR){
