@@ -6,6 +6,7 @@
 #include <list>
 #include "dns_struct.hpp"
 #include "utility.hpp"
+#include "cache.hpp"
 
 
 namespace network{

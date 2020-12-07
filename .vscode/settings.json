@@ -46,6 +46,12 @@
         "typeinfo": "cpp",
         "cstring": "cpp",
         "bitset": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "mutex": "cpp",
+        "chrono": "cpp",
+        "condition_variable": "cpp",
+        "ctime": "cpp",
+        "ratio": "cpp",
+        "thread": "cpp"
     }
 }

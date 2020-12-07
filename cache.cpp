@@ -8,7 +8,8 @@ network::LocalResourceRecordCache::LocalResourceRecordCache(int size){
 
 int network::LocalResourceRecordCache::addResourceRecord(RESOURCE_RECORD rr){
     //if duplicate exist, update it
-    std::string recordName = convertSequenceLabelToHostName(rr.rrName);
+    std::cout<< "ADDReSOURECRECORD" << std::endl;
+    // std::string recordName = convertSequenceLabelToHostName(rr.rrName);
     // for (auto i = resourceRecordList.begin(); i != resourceRecordList.end();) {
     //     // std::string tempRecordName = convertSequenceLabelToHostName(i.rrName);
     //     if (recordName != i.){
