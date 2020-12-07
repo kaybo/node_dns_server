@@ -30,7 +30,7 @@ namespace network{
      
             //performs sequence of actions related to DNS before sending response
             //back to the client
-            void performAction();
+            unsigned char* performAction(std::string domainName);
             
 
         private:

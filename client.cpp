@@ -2,9 +2,10 @@
 
 #include "client.hpp"
 
-network::Client::Client(std::string inputServerIpAddr, int inputPort){
+network::Client::Client(std::string inputServerIpAddr, int inputPort, std::string userInputDomainName){
     serverIpAddr = inputServerIpAddr;
     port = inputPort;
+    domainName = userInputDomainName;
     createSocket();
     connectToServer();
 };
@@ -27,6 +28,29 @@ void network::Client::connectToServer(){
         std::cout << "unable to connect to the server" << std::endl;
     }else{
         std::cout << "connectToServer() succeeded" << std::endl;
+        std::cout << domainName << std::endl;
+        unsigned char encodedData[512];
+        unsigned char buf[512];
+        strncpy((char*)encodedData, domainName.c_str(), sizeof(encodedData));
+        int index = 0;
+        while(encodedData[index] != '\0'){
+            std::cout << "debug: " << encodedData[index] << std::endl;
+            index++;
+        }
+        send(sock, encodedData, 512,0);
+        int readingFromServer = read(sock, buf, 512);
+        // index = 0;
+        // while(buf[index] != '\0'){
+        //     std::cout << "client recieve! debug: " << buf[index] <<std::endl;
+        //     index++;
+        // }
+        int firstByte;
+        unsigned char ipAddrValue[4];
+        memcpy(&firstByte, buf, 1);
+        std::cout << "firsbyte: " << firstByte << std::endl;
+        memcpy(ipAddrValue, buf + 1, 4);
+        std::string convertedIpAdress = convertUnsignedCharToIPAdress(ipAddrValue);
+        std::cout << "ip address: " <<  convertedIpAdress << std::endl;
     }
     
 };

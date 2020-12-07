@@ -31,12 +31,12 @@ int main(int argc, char const *argv[]){
     
     //initializing client
     //std::string inputServerIpAddr, int inputPort, void* data
-    network::Client clientTest = network::Client( userInputIpAddress,port);
+    network::Client clientTest = network::Client( userInputIpAddress,port, userInputDomainName);
 
     // testing:
-    std::cout << userInputIpAddress << std::endl;
-    std::cout << userInputPort << std::endl;
-    std::cout << userInputDomainName << std::endl;
+    // std::cout << userInputIpAddress << std::endl;
+    // std::cout << userInputPort << std::endl;
+    // std::cout << userInputDomainName << std::endl;
 
     
 

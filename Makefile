@@ -1,7 +1,7 @@
 all: dns_client dns_server
 
-dns_client: dns_client.o client_handler.o client.o
-	g++ dns_client.o client_handler.o client.o -o client
+dns_client: dns_client.o client_handler.o utility.o client.o
+	g++ dns_client.o client_handler.o client.o utility.o -o client
 
 dns_server: dns_server.o server.o utility.o dns.o cache.o
 	g++ dns_server.o server.o utility.o dns.o cache.o -pthread -o server

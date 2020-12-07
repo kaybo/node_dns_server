@@ -10,7 +10,7 @@
 
 network::Server::Server(int inputPort){
     answerRRList = new LocalResourceRecordCache(5);
-    performAction();//remove later
+    // performAction();//remove later
     servPort = inputPort;
     createSocket();
     initializeListener();
@@ -45,17 +45,30 @@ void network::Server::createSocket(){
 void network::Server::initializeListener(){
 
     socklen_t clientSize = sizeof(client);
+    unsigned char buf[512];
+    unsigned char sendBuf[512];
+    std::string domainName;
     while(true){
         clientSock = accept(listener, (sockaddr*)&client, &clientSize);
-        performAction();
+        int readingFromClient = read( clientSock , buf, 512);
+        int index = 0;
+        while(buf[index] != '\0'){
+            std::cout << "server debug: " << buf[index] <<std::endl;
+            domainName += buf[index];
+            index++;
+        }
+        unsigned char *res = performAction(domainName);
+        send(clientSock, res, 5, 0);
+        domainName = "";
         close(clientSock);
     }
     
 };
 
-void network::Server::performAction(){
+unsigned char* network::Server::performAction(std::string domainName){
 
-    std::string searchingDomainName = "mihoyo.com";
+    std::string searchingDomainName = domainName;
+    unsigned char *returnArray = new unsigned char [5];
 
 cNameLabel:
     
@@ -71,8 +84,17 @@ cNameLabel:
     int flag = 0;
     int matchingTempNameAndNameServer = 0;
 
+    if(query->answer.size() == 0 && query->additional.size() == 0 && query->authNameServer.size() == 0
+        && flag == 0){
+        memset(returnArray, 0, 5);
+        return returnArray;
+    }
 
     while(query->answer.size() == 0 || flag == 1){
+        if(query->answer.size() == 0 && query->additional.size() == 0 && query->authNameServer.size() == 0){
+            memset(returnArray, 0, 5);
+            return returnArray;
+        }
         std::cout << std::endl << "<><><><><>New Query<><><><><>" << std::endl << std::endl;
         if(query->authNameServer.size() > 0 && query->additional.size() == 0){
             // std::cout << std::endl << "<><><><><>if statement<><><><><>" << std::endl << std::endl;
@@ -170,15 +192,20 @@ cNameLabel:
             searchingDomainName = convertSequenceLabelToHostName(tempAnswerRR.rdata);
             goto cNameLabel;
         }
-        printDecodedResponse(*query);
         
-
     }
 
-   
+    
 
-
-
-
-
+    printDecodedResponse(*query);
+    if(query->answer.size() == 0){
+        memset(returnArray, 0, 5);
+    }else if(query->answer.size() > 0){
+        //todo: add cache byte, 0 indicates not retrieve from cache
+        RESOURCE_RECORD ansRR = query->answer.front();
+        memcpy(returnArray+1, ansRR.rdata, 4);
+        memset(returnArray, 0, 1);
+    }
+    return returnArray;
+    
 };

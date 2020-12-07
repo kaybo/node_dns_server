@@ -11,6 +11,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <iostream>
+#include "utility.hpp"
 
 namespace network{
     class Client
@@ -18,7 +19,7 @@ namespace network{
         public:
 
             //Constructor
-            Client(std::string inputServerIpAddr ,int inputPort);
+            Client(std::string inputServerIpAddr ,int inputPort, std::string userInputDomainName);
             
             //Creates socket and setups any configurations related to the socket
             void createSocket();
@@ -34,6 +35,7 @@ namespace network{
             int port;
             int sock;
             std::string serverIpAddr;
+            std::string domainName;
             sockaddr_in hint;
 
             void setup();
