@@ -57,8 +57,6 @@ void network::Server::createSocket(){
 };
 
 void network::Server::initializeListener(){
-    RESOURCE_RECORD test = RESOURCE_RECORD();
-    ipCache.addResourceRecord(test);
     std::thread loopThread(runTimer);
     // loopThread.join();
 
@@ -205,6 +203,7 @@ cNameLabel:
     }else if(query->answer.size() > 0){
         //todo: add cache byte, 0 indicates not retrieve from cache
         RESOURCE_RECORD ansRR = query->answer.front();
+        ipCache.addResourceRecord(ansRR);
         memcpy(returnArray+1, ansRR.rdata, 4);
         memset(returnArray, 0, 1);
     }

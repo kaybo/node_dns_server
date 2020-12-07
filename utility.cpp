@@ -4,6 +4,7 @@
 #include "constants.hpp"
 
 
+
 unsigned char *convertHostNameToDNSField(std::string inputString){
 
     int newSize = inputString.length() + 2;
@@ -300,9 +301,12 @@ DECODED_RESPONSE *decodeDNSRespond(unsigned char *buf){
 
         unsigned short *compressMsgPointer = new unsigned short; //technically a offset, not really a pointer
         memcpy(compressMsgPointer, buf+pointerOffSet, sizeof(short));
-        pointerOffSet += sizeof(unsigned short);//===TODO===: might need to change this later due to msg compresssion feature
+        
         *compressMsgPointer = ntohs(*compressMsgPointer);
         
+        unsigned char *name;
+
+
         if(*compressMsgPointer >> 14 == 0x3){
             unsigned short offSetValue;
             offSetValue = *compressMsgPointer;
@@ -310,29 +314,48 @@ DECODED_RESPONSE *decodeDNSRespond(unsigned char *buf){
             offSetValue = offSetValue << 2;
             offSetValue = offSetValue >> 2;
             *compressMsgPointer = offSetValue;
+
+            //retrieving name field with compressMsgPointer
+            int tempLength = 0;
+            int tempOffSetTracker = *compressMsgPointer; //used for temp tracing
+            int nameOffsetTracker = *compressMsgPointer;//used for iterating the name
+            while(buf[tempOffSetTracker] != '\0'){
+                tempLength++;
+                tempOffSetTracker++;
+            }
+            tempLength++;
+
+            unsigned char *tempName = new unsigned char[tempLength];
+            for(int inner_index = 0; inner_index < tempLength ; inner_index++){
+                tempName[inner_index] = buf[nameOffsetTracker];
+                nameOffsetTracker++;
+            }
+            name = messageDecompression(buf, tempName, tempLength);
+            pointerOffSet += sizeof(unsigned short);
+
+
         }else{
+            std::cout << "Message compression does =========not======= occur!" << std::endl;
             //Note: Not sure if msg compression does not occur, leaving this condition
             //      in just in case if it is needed
-            std::cout << "Message compression does =========not======= occur!" << std::endl;
-        }
-        //retrieving name field with compressMsgPointer
-        int tempLength = 0;
-        int tempOffSetTracker = *compressMsgPointer; //used for temp tracing
-        int nameOffsetTracker = *compressMsgPointer;//used for iterating the name
-        while(buf[tempOffSetTracker] != '\0'){
-            tempLength++;
-            tempOffSetTracker++;
-        }
-        tempLength++;
-
-        unsigned char *tempName = new unsigned char[tempLength];
-        for(int inner_index = 0; inner_index < tempLength ; inner_index++){
-            tempName[inner_index] = buf[nameOffsetTracker];
-            nameOffsetTracker++;
+            int tempIndex = pointerOffSet;
+            int tempLength = 0;
+            while(buf[tempIndex] != '\0'){
+                // std::cout << "UNCOMPRESS DEBUG: " << buf[tempIndex] << std::endl;
+                tempIndex++;
+            }
+            unsigned char *tempName = new unsigned char[tempLength];
+            int uncompressedIndex = 0;
+            while(uncompressedIndex < tempLength){
+                tempName[uncompressedIndex] = buf[pointerOffSet];
+                pointerOffSet++;
+                uncompressedIndex++;
+            }
+            
         }
 
-        unsigned char *name = messageDecompression(buf, tempName, tempLength);
 
+        
   
         TEMP_RESOURCE_RECORD *tempRR = new TEMP_RESOURCE_RECORD();
         memcpy(tempRR, buf+pointerOffSet, sizeof(TEMP_RESOURCE_RECORD));
@@ -371,7 +394,8 @@ DECODED_RESPONSE *decodeDNSRespond(unsigned char *buf){
             std::cout << "RR type CNAME" << std::endl;
             unsigned char *cName = new unsigned char[decodedRR.rdlength];
             memcpy(cName, buf+pointerOffSet, decodedRR.rdlength);
-            decodedRR.rdata = cName;
+            unsigned char* decompressedCName = messageDecompression(buf, cName, decodedRR.rdlength);
+            decodedRR.rdata = decompressedCName;
         }else if(decodedRR.rrType == SOA){
             std::cout << "RR type SOA" << std::endl;
         }else if(decodedRR.rrType == PTR){
