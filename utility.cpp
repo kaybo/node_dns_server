@@ -207,7 +207,7 @@ unsigned char *messageDecompression(unsigned char *buf, unsigned char *nameServe
     return returnArray;
 };
 
-//TODO: do htons instead of letting user doing it
+
 unsigned char *encodeDNSQuery(std::string domainName, HEADER dnsHeader, QUESTION dnsQuestion){
 
     unsigned char *convertedDomainName = convertHostNameToDNSField(domainName);
@@ -409,9 +409,9 @@ DECODED_RESPONSE *decodeDNSRespond(unsigned char *buf){
             // std::cout << "RR type NS" << std::endl;
             unsigned char *nameServerDomain = new unsigned char [decodedRR.rdlength];
             memcpy(nameServerDomain, buf + pointerOffSet, decodedRR.rdlength);
-            for(int test = 0 ; test < decodedRR.rdlength ; test++){
-                std::cout << "debug NS NS type: " << nameServerDomain[test] << " " <<std::bitset<8>(nameServerDomain[test]) << std::endl;
-            }
+            // for(int test = 0 ; test < decodedRR.rdlength ; test++){
+            //     std::cout << "debug NS NS type: " << nameServerDomain[test] << " " <<std::bitset<8>(nameServerDomain[test]) << std::endl;
+            // }
             unsigned char* decompressedNameServerDomain = messageDecompression(buf, nameServerDomain, decodedRR.rdlength);
             
             decodedRR.rdata = decompressedNameServerDomain;
@@ -430,7 +430,6 @@ DECODED_RESPONSE *decodeDNSRespond(unsigned char *buf){
             std::cout << "RR type PTR" << std::endl;
         }else{
             std::cout << "none of the RR type has been matched" << std::endl;
-            //TODO: decrement the specific count fields because of ignoring them
         }
         pointerOffSet += decodedRR.rdlength;
 
@@ -439,7 +438,11 @@ DECODED_RESPONSE *decodeDNSRespond(unsigned char *buf){
             decodedAnswerList->push_back(decodedRR);
             answerCount--;
         }else if(nsCount > 0){
-            decodedAuthNameServerList->push_back(decodedRR);
+            if(decodedRR.rrType != SOA){
+                decodedAuthNameServerList->push_back(decodedRR);
+            }else{
+                returnInformation->head.nscount--;
+            }
             nsCount--;
         }else if(additionalCount > 0){
             //TODO:may need to decrement AAA types and add type checking here

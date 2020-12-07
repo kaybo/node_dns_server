@@ -11,6 +11,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <iostream>
+#include "cache.hpp"
 
 namespace network{
     class Server
@@ -39,6 +40,7 @@ namespace network{
             sockaddr_in client;
             int clientSock;
 
+            LocalResourceRecordCache *answerRRList;
 
     };
 }
