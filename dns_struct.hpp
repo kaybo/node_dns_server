@@ -1,3 +1,4 @@
+//author: Feng Wu
 #ifndef DNS_STRUCT_H
 #define DNS_STRUCT_H
 
