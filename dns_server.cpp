@@ -13,7 +13,8 @@ int main(int argc, char const *argv[]){
     //user input
 
     std::string userInputPort;
-
+    std::cout << "DNS Server" << std::endl;
+    std::cout << "Made by Feng Wu for CMPT 471 Final project" << std::endl;
     std::cout << "Enter the DNS server port number that you want to connect to:" << std::endl;
     std::cin >> userInputPort;
 

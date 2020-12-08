@@ -18,7 +18,7 @@ std::mutex ipCacheMutex;
 void runTimer(){
     while(1){
         ipCacheMutex.lock();
-        std::cout << "running timer thread, inside critical section" << std::endl;
+        std::cout << "Cache thread running..." << std::endl;
         ipCache.decrementTTLValues(5);
         ipCacheMutex.unlock();
         sleep(5);

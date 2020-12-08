@@ -47,8 +47,6 @@ DECODED_RESPONSE *dnsSendQuery(std::string domainName, std::string destinationIP
 
         unsigned char buffer[512]; 
         memset (&buffer, 0, 512);
-        //todo: look up bind9 and wireshark
-        std::cout << "send test data to dns server: " << result << std::endl; 
     
         
         socklen_t len = 0;

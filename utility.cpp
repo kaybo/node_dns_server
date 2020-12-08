@@ -335,13 +335,11 @@ DECODED_RESPONSE *decodeDNSRespond(unsigned char *buf){
 
 
         }else{
-            std::cout << "Message compression does =========not======= occur!" << std::endl;
             //Note: Not sure if msg compression does not occur, leaving this condition
             //      in just in case if it is needed
             int tempIndex = pointerOffSet;
             int tempLength = 0;
             while(buf[tempIndex] != '\0'){
-                std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@UNCOMPRESS DEBUG: " << buf[tempIndex] <<" " << std::bitset<8>(buf[tempIndex])<<std::endl;
                 tempIndex++;
                 tempLength++;
             }
@@ -354,7 +352,7 @@ DECODED_RESPONSE *decodeDNSRespond(unsigned char *buf){
             }
             tempName[uncompressedIndex] = '\0';
             name = tempName;
-            std::cout << "TEMP LENGTH@@@@@@@@@@@@@@@@@@@@@@@: " << tempLength << " " <<pointerOffSet<< std::endl;
+        
             pointerOffSet ++;
             
         }
@@ -402,11 +400,11 @@ DECODED_RESPONSE *decodeDNSRespond(unsigned char *buf){
             unsigned char* decompressedCName = messageDecompression(buf, cName, decodedRR.rdlength);
             decodedRR.rdata = decompressedCName;
         }else if(decodedRR.rrType == SOA){
-            std::cout << "RR type SOA" << std::endl;
+            // std::cout << "RR type SOA" << std::endl;
         }else if(decodedRR.rrType == PTR){
-            std::cout << "RR type PTR" << std::endl;
+            // std::cout << "RR type PTR" << std::endl;
         }else{
-            std::cout << "none of the RR type has been matched" << std::endl;
+            // std::cout << "none of the RR type has been matched" << std::endl;
         }
         pointerOffSet += decodedRR.rdlength;
 
