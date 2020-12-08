@@ -17,14 +17,16 @@ std::mutex ipCacheMutex;
 
 void runTimer(){
     while(1){
-        std::cout << "running timer thread" << std::endl;
+        ipCacheMutex.lock();
+        std::cout << "running timer thread, inside critical section" << std::endl;
+        ipCache.decrementTTLValues(5);
+        ipCacheMutex.unlock();
         sleep(5);
     }
 };
 
 network::Server::Server(int inputPort){
-    answerRRList = new LocalResourceRecordCache(5);
-    // performAction();//remove later
+    answerRRList = new LocalResourceRecordCache(3);
     servPort = inputPort;
     createSocket();
     initializeListener();
@@ -81,9 +83,30 @@ void network::Server::initializeListener(){
 };
 
 unsigned char* network::Server::performAction(std::string domainName){
+    unsigned char *returnArray = new unsigned char [5];
+
+    //search in cache first
+    ipCacheMutex.lock();
+    RESOURCE_RECORD cacheRR = ipCache.getResourceRecordByName(domainName);
+    ipCacheMutex.unlock();
+    
+    std::cout << "><><>< Looking domain name inside cache...><><><" << std::endl;
+    if(cacheRR.ttl != 0){
+        std::cout << "><><>< Found Resource Record with the domain name inside cache! ><><><" << std::endl;
+        //need to perform mutex lock
+        memset(returnArray, 0, 1);
+        ipCacheMutex.lock();
+        ipCache.addResourceRecord(cacheRR);
+        ipCacheMutex.unlock();
+        memcpy(returnArray+1, cacheRR.rdata, 4);
+        return returnArray;
+    }else{
+        std::cout << "><><>< Unable to find domain name inside cache, executing iterative DNS query... ><><><" << std::endl;
+    }
+    
 
     std::string searchingDomainName = domainName;
-    unsigned char *returnArray = new unsigned char [5];
+    
 
 cNameLabel:
     
@@ -189,6 +212,26 @@ cNameLabel:
             break;
         }
         if(tempAnswerRR.rrType == CNAME){
+            std::string rrCName = convertSequenceLabelToHostName(tempAnswerRR.rdata);
+            //search in cache first
+            ipCacheMutex.lock();
+            RESOURCE_RECORD cacheCNAMERR = ipCache.getResourceRecordByName(rrCName);
+            ipCacheMutex.unlock();
+            
+            std::cout << "><><>< Looking CNAME inside cache...><><><" << std::endl;
+            if(cacheCNAMERR.ttl != 0){
+                std::cout << "><><>< Found Resource Record with the CNAME inside cache! ><><><" << std::endl;
+                //need to perform mutex lock
+                memset(returnArray, 0, 1);
+                ipCacheMutex.lock();
+                ipCache.addResourceRecord(cacheCNAMERR);
+                ipCacheMutex.unlock();
+                memcpy(returnArray+1, cacheCNAMERR.rdata, 4);
+                return returnArray;
+            }else{
+                std::cout << "><><>< Unable to find CNAME inside cache, executing iterative DNS query... ><><><" << std::endl;
+            }
+
             searchingDomainName = convertSequenceLabelToHostName(tempAnswerRR.rdata);
             goto cNameLabel;
         }
@@ -203,9 +246,12 @@ cNameLabel:
     }else if(query->answer.size() > 0){
         //todo: add cache byte, 0 indicates not retrieve from cache
         RESOURCE_RECORD ansRR = query->answer.front();
-        ipCache.addResourceRecord(ansRR);
-        memcpy(returnArray+1, ansRR.rdata, 4);
+        //need to perform mutex lock
         memset(returnArray, 0, 1);
+        ipCacheMutex.lock();
+        ipCache.addResourceRecord(ansRR);
+        ipCacheMutex.unlock();
+        memcpy(returnArray+1, ansRR.rdata, 4);
     }
     return returnArray;
     

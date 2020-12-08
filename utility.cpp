@@ -67,7 +67,7 @@ std::string convertSequenceLabelToHostName(unsigned char *field){
 };
 
 void printDecodedResponse(DECODED_RESPONSE res){
-    std::cout << "=========Print Decoded Response=========" << std::endl;
+    std::cout << std::endl << "=========Print Decoded Response=========" << std::endl;
     std::cout << "*******Header Section********" << std::endl;
     printHeader(res.head);
     std::cout << "****************************" << std::endl;
@@ -89,7 +89,7 @@ void printDecodedResponse(DECODED_RESPONSE res){
         printResourceRecord(rr);
     }
     std::cout << "**********************************" << std::endl;
-    std::cout << "=========================================" << std::endl;
+    std::cout << "=========================================" << std::endl << std::endl;
 };
 
 void printResourceRecord(RESOURCE_RECORD rr){
@@ -341,16 +341,20 @@ DECODED_RESPONSE *decodeDNSRespond(unsigned char *buf){
             int tempIndex = pointerOffSet;
             int tempLength = 0;
             while(buf[tempIndex] != '\0'){
-                // std::cout << "UNCOMPRESS DEBUG: " << buf[tempIndex] << std::endl;
+                std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@UNCOMPRESS DEBUG: " << buf[tempIndex] <<" " << std::bitset<8>(buf[tempIndex])<<std::endl;
                 tempIndex++;
+                tempLength++;
             }
-            unsigned char *tempName = new unsigned char[tempLength];
+            unsigned char *tempName = new unsigned char[tempLength+1];
             int uncompressedIndex = 0;
             while(uncompressedIndex < tempLength){
                 tempName[uncompressedIndex] = buf[pointerOffSet];
                 pointerOffSet++;
                 uncompressedIndex++;
             }
+            tempName[uncompressedIndex] = '\0';
+            name = messageDecompression(buf, tempName, tempLength+1);
+            pointerOffSet = pointerOffSet + tempLength + 1;
             
         }
 

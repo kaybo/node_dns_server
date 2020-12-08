@@ -6,7 +6,7 @@
 #include <list>
 #include "dns_struct.hpp"
 #include "utility.hpp"
-#include "cache.hpp"
+
 
 
 namespace network{
@@ -15,20 +15,16 @@ namespace network{
         public:
             LocalResourceRecordCache(int size);
 
-            //decrements the ttl values in the whole list by value
+            //decrements the ttl values in the whole list by value, if ttl is less than 1, remove it
             void decrementTTLValues(int value);
 
             //gets resource record by domain name, if ttl is less than 1, does not return the RR
-            RESOURCE_RECORD *getResourceRecordByName(std::string name);
+            RESOURCE_RECORD getResourceRecordByName(std::string name);
             
             //returns 0 if successful, 1 if error, also checks for duplicates
             int addResourceRecord(RESOURCE_RECORD rr);
 
-            //removes resource record by domain name and returns it
-            RESOURCE_RECORD removeResourceRecord(std::string name);
-
         private:
-        // sem_t *readWriteMutex;
         int cacheSize;
         std::list<RESOURCE_RECORD> resourceRecordList;
     };
