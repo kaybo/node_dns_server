@@ -353,8 +353,9 @@ DECODED_RESPONSE *decodeDNSRespond(unsigned char *buf){
                 uncompressedIndex++;
             }
             tempName[uncompressedIndex] = '\0';
-            name = messageDecompression(buf, tempName, tempLength+1);
-            pointerOffSet = pointerOffSet + tempLength + 1;
+            name = tempName;
+            std::cout << "TEMP LENGTH@@@@@@@@@@@@@@@@@@@@@@@: " << tempLength << " " <<pointerOffSet<< std::endl;
+            pointerOffSet ++;
             
         }
 
