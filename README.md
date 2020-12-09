@@ -42,7 +42,7 @@ For IP address, please use 127.0.0.1 and the same port as the server.
 
 1) Server only accepts one client at a time. Do not send more than 1 request at a time.
 
-2) Server may go into a freezing because packets are sent over UDP when sending/receiving
+2) Server may freeze because packets are sent over UDP when sending/receiving
 DNS queries. This scenario is rare. Note that reliable transfer is not implementated. 
 
 3) Try not to use SFU csil computers, DNS queries will get blocked if you perform DNS queries
