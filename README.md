@@ -1,6 +1,6 @@
-#CMPT 471 Final Project
+# CMPT 471 Final Project
 
-##Requisites:
+## Requisites:
 
 1)Must run on Ubuntu. I have not tested on other distros
 
@@ -22,7 +22,7 @@ make
 
 Two executables should be created called client and server.
 
-##Running the executables
+## Running the executables
 
 1) To run the server
 ```
@@ -36,7 +36,7 @@ any ports that are free.
 Afterwards,  it will ask you to specify the IP address, port and domain name.
 For IP address, please use 127.0.0.1 and the same port as the server.
 
-##Issues, Bugs
+## Issues, Bugs
 
 1) Server only accepts one client at a time. Do not send more than 1 request at a time.
 
