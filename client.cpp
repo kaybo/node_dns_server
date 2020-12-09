@@ -43,7 +43,6 @@ void network::Client::connectToServer(){
         int firstByte;
         unsigned char ipAddrValue[4];
         memcpy(&firstByte, buf, 1);
-        std::cout << "firsbyte: " << firstByte << std::endl;
         memcpy(ipAddrValue, buf + 1, 4);
         if(ipAddrValue[0] == 0 && ipAddrValue[1] == 0 && ipAddrValue[2] == 0 && ipAddrValue[3] == 0){
             std::cout << "Domain name not found" << std::endl;

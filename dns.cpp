@@ -53,7 +53,6 @@ DECODED_RESPONSE *dnsSendQuery(std::string domainName, std::string destinationIP
         int n = recvfrom(dnsListener, buffer, 512,  
                 0, (struct sockaddr *) &dnsHint, 
                 &len); 
-        std::cout << "retrieve successful? " << std::endl; 
 
         DECODED_RESPONSE *res = decodeDNSRespond(buffer);
         // printDecodedResponse(*testRes);
