@@ -42,7 +42,7 @@ For IP address, please use 127.0.0.1 and the same port as the server.
 
 1) Server only accepts one client at a time. Do not send more than 1 request at a time.
 
-2) Server may go into a deadlock because packets are sent over UDP when sending/receiving
+2) Server may go into a freezing because packets are sent over UDP when sending/receiving
 DNS queries. This scenario is rare. Note that reliable transfer is not implementated. 
 
 3) Try not to use SFU csil computers, DNS queries will get blocked if you perform DNS queries
@@ -52,14 +52,14 @@ multiple times within a short time frame.
 
 5) Server and client must run on the same host. Server is default configured to run on localhost
 
-6) Executing too many DNS lookup may result in TLD, authoritative DNS servers blocking your IP which results in deadlock on the local DNS server.
+6) Executing too many DNS lookup may result in TLD, authoritative DNS servers blocking your IP which results in freezing on the local DNS server.
 
 7) After exiting the server, the server does not shut down successfully so the port may still be
 in used. Need to use a different port number to solve this issue.
 
 8) Possibility of memory leaks.
 
-9) DNS header transaction ID is kept 1337 for simplicity.
+9) DNS header transaction ID is kept as 1337 for simplicity.
 
 ## Testing
 
