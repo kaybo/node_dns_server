@@ -180,7 +180,7 @@ Enter the DNS server IP address that you want to connect to:
 Enter the DNS server port number that you want to connect to:
 1336
 Enter the domain name that you want to resolve: 
-thisdomainnamedoesnotexist.com
+google.com
 ```
 
 Client output result
@@ -299,7 +299,7 @@ Enter the DNS server IP address that you want to connect to:
 Enter the DNS server port number that you want to connect to:
 1336
 Enter the domain name that you want to resolve: 
-thisdomainnamedoesnotexist.com
+google.com
 ```
 
 Client output result
