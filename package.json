@@ -1,0 +1,19 @@
+{
+  "name": "node_dns_server",
+  "version": "1.0.0",
+  "description": "dns server with some embeded C++ code",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kaybo/node_dns_server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kaybo/node_dns_server/issues"
+  },
+  "homepage": "https://github.com/kaybo/node_dns_server#readme"
+}
