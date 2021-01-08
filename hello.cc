@@ -61,7 +61,7 @@ void Add(const FunctionCallbackInfo<Value>& args) {
   //formating header information
   //TODO: Fill in everything
   head->Set(context,
-    String::NewFromUtf8(isolate, "msg").ToLocalChecked(),
+    String::NewFromUtf8(isolate, "id").ToLocalChecked(),
       Number::New(isolate, dnsRes->head.id))
       .FromJust();
 
@@ -69,8 +69,73 @@ void Add(const FunctionCallbackInfo<Value>& args) {
   //formating answer section
   Local<Array> answerArray = Array::New(isolate);
 
+  int ansIndex = 0;
   for(RESOURCE_RECORD ansRR: dnsRes->answer){
-    std::cout << "testing: " << ansRR.ttl << std::endl;
+    Local<Object> ansObj = Object::New(isolate);
+    std::string name = convertSequenceLabelToHostName(ansRR.rrName);
+    std::string data = convertUnsignedCharToIPAdress(ansRR.rdata);
+
+    
+
+    // std::cout << "testing: " << ansRR.ttl << std::endl;
+
+    std::string strAnsIndex = std::to_string(ansIndex);
+    
+    //convert into char so it can be used
+    const char * charName = name.c_str();
+    const char * charStrAnsIndex = strAnsIndex.c_str();
+    const char * charData = data.c_str();
+
+    ansObj->Set(context,
+    String::NewFromUtf8(isolate, "name").ToLocalChecked(), String::NewFromUtf8(isolate, charName).ToLocalChecked()
+      ).FromJust();
+
+    ansObj->Set(context,
+    String::NewFromUtf8(isolate, "type").ToLocalChecked(), Number::New(isolate, ansRR.rrType)
+      ).FromJust();
+
+    ansObj->Set(context,
+    String::NewFromUtf8(isolate, "class").ToLocalChecked(), Number::New(isolate, ansRR.rrClass)
+      ).FromJust();
+
+    ansObj->Set(context,
+    String::NewFromUtf8(isolate, "ttl").ToLocalChecked(), Number::New(isolate, ansRR.ttl)
+      ).FromJust();
+
+    ansObj->Set(context,
+    String::NewFromUtf8(isolate, "length").ToLocalChecked(), Number::New(isolate, ansRR.rdlength)
+      ).FromJust();
+
+    ansObj->Set(context,
+    String::NewFromUtf8(isolate, "data").ToLocalChecked(), String::NewFromUtf8(isolate, charData).ToLocalChecked()
+      ).FromJust();
+
+    //appends object into the answeArray
+    answerArray->Set(context,
+    String::NewFromUtf8(isolate, charStrAnsIndex).ToLocalChecked(), ansObj)
+      .FromJust();
+
+    
+      
+
+    ansIndex++;
+    std::string strAnsIndex2 = std::to_string(ansIndex);
+    const char * charStrAnsIndex2 = strAnsIndex.c_str();
+
+  Local<Object> ansObj2 = Object::New(isolate);
+
+    // ansObj2->Set(context,
+    // String::NewFromUtf8(isolate, "name").ToLocalChecked(),
+    //   String::NewFromUtf8(isolate, charName).ToLocalChecked()
+    //    )
+    //   .FromJust();
+
+    answerArray->Set(context,
+    ansIndex,
+      String::NewFromUtf8(isolate, "testingdudeomg").ToLocalChecked())
+      .FromJust();
+
+
   }  
 
 
@@ -78,6 +143,11 @@ void Add(const FunctionCallbackInfo<Value>& args) {
   obj->Set(context,
     String::NewFromUtf8(isolate, "head").ToLocalChecked(),
       head )
+      .FromJust();
+  
+  obj->Set(context,
+    String::NewFromUtf8(isolate, "answer").ToLocalChecked(),
+      answerArray )
       .FromJust();
 
       
