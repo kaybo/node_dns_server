@@ -47,23 +47,78 @@ void Add(const FunctionCallbackInfo<Value>& args) {
   //running custom C++ DNS query
   DECODED_RESPONSE *dnsRes = dnsSendQuery(domainName, destAddress);
 
-  //debugging here
-  printDecodedResponse(*dnsRes);
-
-
 
   // Perform the operation
   double value = 5;
 
   Local<Object> obj = Object::New(isolate);
+
   Local<Object> head = Object::New(isolate);
 
   //formating header information
-  //TODO: Fill in everything
-  head->Set(context,
-    String::NewFromUtf8(isolate, "id").ToLocalChecked(),
-      Number::New(isolate, dnsRes->head.id))
+  head->Set(context, String::NewFromUtf8(isolate, "id").ToLocalChecked(),Number::New(isolate, dnsRes->head.id))
       .FromJust();
+
+  head->Set(context, String::NewFromUtf8(isolate, "qr").ToLocalChecked(),Number::New(isolate, dnsRes->head.qr))
+      .FromJust();
+  
+  head->Set(context, String::NewFromUtf8(isolate, "opcode").ToLocalChecked(),Number::New(isolate, dnsRes->head.opcode))
+      .FromJust();
+  
+  head->Set(context, String::NewFromUtf8(isolate, "aa").ToLocalChecked(),Number::New(isolate, dnsRes->head.aa))
+      .FromJust();
+
+  head->Set(context, String::NewFromUtf8(isolate, "tc").ToLocalChecked(),Number::New(isolate, dnsRes->head.tc))
+      .FromJust();
+  
+  head->Set(context, String::NewFromUtf8(isolate, "rd").ToLocalChecked(),Number::New(isolate, dnsRes->head.rd))
+      .FromJust();
+  
+  head->Set(context, String::NewFromUtf8(isolate, "ra").ToLocalChecked(),Number::New(isolate, dnsRes->head.ra))
+      .FromJust();
+  
+  head->Set(context, String::NewFromUtf8(isolate, "z").ToLocalChecked(),Number::New(isolate, dnsRes->head.z))
+      .FromJust();
+
+  head->Set(context, String::NewFromUtf8(isolate, "ad").ToLocalChecked(),Number::New(isolate, dnsRes->head.ad))
+      .FromJust();
+
+  head->Set(context, String::NewFromUtf8(isolate, "cd").ToLocalChecked(),Number::New(isolate, dnsRes->head.cd))
+      .FromJust();
+
+  head->Set(context, String::NewFromUtf8(isolate, "rcode").ToLocalChecked(),Number::New(isolate, dnsRes->head.rcode))
+      .FromJust();
+
+  head->Set(context, String::NewFromUtf8(isolate, "questionCount").ToLocalChecked(),Number::New(isolate, dnsRes->head.qdcount))
+      .FromJust();
+
+  head->Set(context, String::NewFromUtf8(isolate, "answerCount").ToLocalChecked(),Number::New(isolate, dnsRes->head.ancount))
+      .FromJust();
+
+  head->Set(context, String::NewFromUtf8(isolate, "authorityCount").ToLocalChecked(),Number::New(isolate, dnsRes->head.nscount))
+      .FromJust();
+
+  head->Set(context, String::NewFromUtf8(isolate, "additionalCount").ToLocalChecked(),Number::New(isolate, dnsRes->head.arcount))
+      .FromJust();
+
+  //formating question section
+  Local<Object> question = Object::New(isolate);
+
+  std::string qname = convertSequenceLabelToHostName(dnsRes->question.qname);
+  const char * charQName = qname.c_str();
+
+  question->Set(context, String::NewFromUtf8(isolate, "name").ToLocalChecked(),String::NewFromUtf8(isolate, charQName).ToLocalChecked() )
+      .FromJust();
+  
+  question->Set(context,
+    String::NewFromUtf8(isolate, "type").ToLocalChecked(), Number::New(isolate, dnsRes->question.qtype)
+      ).FromJust();
+  
+  question->Set(context,
+    String::NewFromUtf8(isolate, "class").ToLocalChecked(), Number::New(isolate, dnsRes->question.qclass)
+      ).FromJust();
+
+  
 
 
   //formating answer section
@@ -74,16 +129,9 @@ void Add(const FunctionCallbackInfo<Value>& args) {
     Local<Object> ansObj = Object::New(isolate);
     std::string name = convertSequenceLabelToHostName(ansRR.rrName);
     std::string data = convertUnsignedCharToIPAdress(ansRR.rdata);
-
-    
-
-    // std::cout << "testing: " << ansRR.ttl << std::endl;
-
-    std::string strAnsIndex = std::to_string(ansIndex);
     
     //convert into char so it can be used
     const char * charName = name.c_str();
-    const char * charStrAnsIndex = strAnsIndex.c_str();
     const char * charData = data.c_str();
 
     ansObj->Set(context,
@@ -112,32 +160,100 @@ void Add(const FunctionCallbackInfo<Value>& args) {
 
     //appends object into the answeArray
     answerArray->Set(context,
-    String::NewFromUtf8(isolate, charStrAnsIndex).ToLocalChecked(), ansObj)
+    ansIndex, ansObj)
       .FromJust();
-
-    
-      
-
     ansIndex++;
-    std::string strAnsIndex2 = std::to_string(ansIndex);
-    const char * charStrAnsIndex2 = strAnsIndex.c_str();
-
-  Local<Object> ansObj2 = Object::New(isolate);
-
-    // ansObj2->Set(context,
-    // String::NewFromUtf8(isolate, "name").ToLocalChecked(),
-    //   String::NewFromUtf8(isolate, charName).ToLocalChecked()
-    //    )
-    //   .FromJust();
-
-    answerArray->Set(context,
-    ansIndex,
-      String::NewFromUtf8(isolate, "testingdudeomg").ToLocalChecked())
-      .FromJust();
-
-
   }  
 
+  ansIndex = 0;
+
+  //auth section
+  Local<Array> authArray = Array::New(isolate);
+
+  for(RESOURCE_RECORD authRR: dnsRes->authNameServer){
+    Local<Object> authObj = Object::New(isolate);
+    std::string name = convertSequenceLabelToHostName(authRR.rrName);
+    std::string data = convertUnsignedCharToIPAdress(authRR.rdata);
+    
+    //convert into char so it can be used
+    const char * charName = name.c_str();
+    const char * charData = data.c_str();
+
+    authObj->Set(context,
+    String::NewFromUtf8(isolate, "name").ToLocalChecked(), String::NewFromUtf8(isolate, charName).ToLocalChecked()
+      ).FromJust();
+
+    authObj->Set(context,
+    String::NewFromUtf8(isolate, "type").ToLocalChecked(), Number::New(isolate, authRR.rrType)
+      ).FromJust();
+
+    authObj->Set(context,
+    String::NewFromUtf8(isolate, "class").ToLocalChecked(), Number::New(isolate, authRR.rrClass)
+      ).FromJust();
+
+    authObj->Set(context,
+    String::NewFromUtf8(isolate, "ttl").ToLocalChecked(), Number::New(isolate, authRR.ttl)
+      ).FromJust();
+
+    authObj->Set(context,
+    String::NewFromUtf8(isolate, "length").ToLocalChecked(), Number::New(isolate, authRR.rdlength)
+      ).FromJust();
+
+    authObj->Set(context,
+    String::NewFromUtf8(isolate, "data").ToLocalChecked(), String::NewFromUtf8(isolate, charData).ToLocalChecked()
+      ).FromJust();
+
+    //appends object into the answeArray
+    authArray->Set(context,
+    ansIndex, authObj)
+      .FromJust();
+    ansIndex++;
+  }  
+  
+  ansIndex = 0;
+  
+  //additional section
+  Local<Array> additionalArray = Array::New(isolate);
+
+  for(RESOURCE_RECORD additionalRR: dnsRes->additional){
+    Local<Object> additionalObj = Object::New(isolate);
+    std::string name = convertSequenceLabelToHostName(additionalRR.rrName);
+    std::string data = convertUnsignedCharToIPAdress(additionalRR.rdata);
+    
+    //convert into char so it can be used
+    const char * charName = name.c_str();
+    const char * charData = data.c_str();
+
+    additionalObj->Set(context,
+    String::NewFromUtf8(isolate, "name").ToLocalChecked(), String::NewFromUtf8(isolate, charName).ToLocalChecked()
+      ).FromJust();
+
+    additionalObj->Set(context,
+    String::NewFromUtf8(isolate, "type").ToLocalChecked(), Number::New(isolate, additionalRR.rrType)
+      ).FromJust();
+
+    additionalObj->Set(context,
+    String::NewFromUtf8(isolate, "class").ToLocalChecked(), Number::New(isolate, additionalRR.rrClass)
+      ).FromJust();
+
+    additionalObj->Set(context,
+    String::NewFromUtf8(isolate, "ttl").ToLocalChecked(), Number::New(isolate, additionalRR.ttl)
+      ).FromJust();
+
+    additionalObj->Set(context,
+    String::NewFromUtf8(isolate, "length").ToLocalChecked(), Number::New(isolate, additionalRR.rdlength)
+      ).FromJust();
+
+    additionalObj->Set(context,
+    String::NewFromUtf8(isolate, "data").ToLocalChecked(), String::NewFromUtf8(isolate, charData).ToLocalChecked()
+      ).FromJust();
+
+    //appends object into the answeArray
+    additionalArray->Set(context,
+    ansIndex, additionalObj)
+      .FromJust();
+    ansIndex++;
+  }  
 
   //adding all sections into the return object
   obj->Set(context,
@@ -146,11 +262,24 @@ void Add(const FunctionCallbackInfo<Value>& args) {
       .FromJust();
   
   obj->Set(context,
+    String::NewFromUtf8(isolate, "question").ToLocalChecked(),
+      question )
+      .FromJust();
+
+  obj->Set(context,
     String::NewFromUtf8(isolate, "answer").ToLocalChecked(),
       answerArray )
       .FromJust();
 
-      
+  obj->Set(context,
+    String::NewFromUtf8(isolate, "authority").ToLocalChecked(),
+      authArray )
+      .FromJust();
+
+  obj->Set(context,
+    String::NewFromUtf8(isolate, "additional").ToLocalChecked(),
+      additionalArray )
+      .FromJust();    
 
 // obj->Set(String::NewFromUtf8(isolate, "hello"), String::NewFromUtf8(isolate, "hello there"));
 
