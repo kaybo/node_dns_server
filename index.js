@@ -4,16 +4,22 @@ var A_ROOT = '198.41.0.4';
 
 //returns the ip for the given host name
 const hostNameLookUp = (domainName) => {
-    let resQuery = dns.query(domainName, '61.151.180.47');
+    let tempDomainName = domainName;
+    let resQuery = dns.query(tempDomainName, A_ROOT);
     let isAnswerFound = false;
     let ansObj = undefined;
-    console.log(resQuery);
 
     if(resQuery.answer.length === 0 && resQuery.authority.length === 0 && resQuery.additional.length === 0) return 'unknown';
 
     while(!isAnswerFound){
         if(resQuery.answer.length === 0){
-
+            //takes the first RR of the additional section and uses that ip to do iterative lookup
+            if(resQuery.authority.length > 0 && resQuery.additional.length > 0){
+                let newIpAddress = resQuery.additional[0].data;
+                resQuery = dns.query(tempDomainName, newIpAddress);
+            }else{
+                return 'unknown';
+            }
         }else{
             //checks answer sections and handles condition of CNAME occurs
             let isAnswerIPFound = false;
@@ -25,12 +31,11 @@ const hostNameLookUp = (domainName) => {
                 };
             });
             if(!isAnswerIPFound){
-                let cName = resQuery.answer[0].data;
-                resQuery = dns.query(cName, A_ROOT);
+                tempDomainName = resQuery.answer[0].data;
+                resQuery = dns.query(tempDomainName, A_ROOT);
             }
         }
     }
-
     return (resQuery.answer.length === 0) ?  'unknown' : ansObj.data;
 };
 
@@ -43,4 +48,4 @@ const checkIfIpAddress = (data) => {
 };
 
 
-console.log(hostNameLookUp('google.com'));
+console.log(hostNameLookUp('sfu.ca'));
