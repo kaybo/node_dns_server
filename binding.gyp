@@ -1,8 +1,8 @@
 {
   "targets": [
     {
-      "target_name": "test",
-      "sources": [ "hello.cc", "dns.cpp", "utility.cpp" ]
+      "target_name": "convert",
+      "sources": [ "convert.cc", "dns.cpp", "utility.cpp" ]
     }
   ]
 }

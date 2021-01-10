@@ -4,7 +4,6 @@
 
 
 DECODED_RESPONSE *dnsSendQuery(std::string domainName, std::string destinationIPAddress){
-    std::cout <<"dns test" <<std::endl;
     HEADER head = HEADER();
     head.id = htons(1337);
     head.qr = 0x0;

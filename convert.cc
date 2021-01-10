@@ -23,7 +23,7 @@ using v8::Array;
 // This is the implementation of the "add" method
 // Input arguments are passed using the
 // const FunctionCallbackInfo<Value>& args struct
-void Add(const FunctionCallbackInfo<Value>& args) {
+void query(const FunctionCallbackInfo<Value>& args) {
   Isolate* isolate = args.GetIsolate();
   Local<Context> context = isolate->GetCurrentContext();
 
@@ -173,7 +173,7 @@ void Add(const FunctionCallbackInfo<Value>& args) {
   for(RESOURCE_RECORD authRR: dnsRes->authNameServer){
     Local<Object> authObj = Object::New(isolate);
     std::string name = convertSequenceLabelToHostName(authRR.rrName);
-    std::string data = convertUnsignedCharToIPAdress(authRR.rdata);
+    std::string data = convertSequenceLabelToHostName(authRR.rdata);
     
     //convert into char so it can be used
     const char * charName = name.c_str();
@@ -289,7 +289,7 @@ void Add(const FunctionCallbackInfo<Value>& args) {
 }
 
 void Init(Local<Object> exports) {
-  NODE_SET_METHOD(exports, "add", Add);
+  NODE_SET_METHOD(exports, "query", query);
 }
 
 NODE_MODULE(NODE_GYP_MODULE_NAME, Init)
