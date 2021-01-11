@@ -49,7 +49,7 @@ const hostNameLookUp = (domainName) => {
             }
         }
     }
-    return (resQuery.answer.length === 0) ?  'unknown' : ansObj.data;
+    return (resQuery.answer.length === 0) ?  'unknown' : ansObj;
 };
 
 const checkIfIpAddress = (data) => {
